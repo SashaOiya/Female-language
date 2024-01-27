@@ -1,0 +1,1 @@
+g++ stack.cpp assembler.cpp
