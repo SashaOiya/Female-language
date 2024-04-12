@@ -15,12 +15,11 @@ int main ( int argc, char *argv[] )
     File.out_buffer = File_Skip_Spaces ( File.out_buffer, File.file_size );
     printf ( "%s\n", File.out_buffer ); // debug
 
-    Tree.start = GetG ( File.out_buffer, Tree.start );
+    Tree.start = GetG ( File.out_buffer, &Tree );
 
     //Analitic ( buffer, tree.start );
-
-    Tree_Graph_Dump ( Tree.start );
-    Tree_Text_Dump ( Tree.start );
+    Tree_Graph_Dump ( Tree.start, Tree.name_storage );
+    Tree_Text_Dump ( Tree.start, Tree.name_storage );
 
     FromType_ToOption ( Tree.start );
 
@@ -152,7 +151,7 @@ char *File_Skip_Spaces ( char *data, int file_size )
 
 } */
 
-void Tree_Text_Dump ( const struct Node_t *tree_node )
+void Tree_Text_Dump ( const struct Node_t *tree_node, const Name_t *name_storage )
 {
     if ( tree_node == nullptr) {
 
@@ -160,23 +159,37 @@ void Tree_Text_Dump ( const struct Node_t *tree_node )
     }
     printf ( " ( " );
 
-    Tree_Text_Dump ( tree_node->left  );
+    Tree_Text_Dump ( tree_node->left, name_storage );
 
     if ( tree_node->type == NUM ) {
         printf ( "%d", tree_node->value );
     }
-    else if ( tree_node->type == VAR ||
-              tree_node->type == OP  ) {
-        printf ( "%d", tree_node->value );
+    else if ( tree_node->type == OP  ) {
+        printf ( "%c", tree_node->value );
     }
+    else if ( tree_node->type == VAR  ||
+              tree_node->type == FUNC ||
+              tree_node->type == FUNC_HEAD ) {
+        printf ( "%s", name_storage[tree_node->value].value );
+    }
+    else if ( tree_node->type == KEY_WORD ) {
+        if ( tree_node->value == KEY_W_IF ) {
+            printf ( "if" );
+        }
+        else if ( tree_node->value == KEY_W_WHILE ) {
+            printf ( "while" );
+        }
+    }
+    else { printf ( "LOSHARA" ); }
 
-    Tree_Text_Dump ( tree_node->right );
+
+    Tree_Text_Dump ( tree_node->right, name_storage );
 
     printf ( " ) " );
 
 }
 
-Errors_t Tree_Graph_Dump ( const struct Node_t *tree )
+Errors_t Tree_Graph_Dump ( const struct Node_t *tree, const Name_t *name_storage )
 {
     static int file_count = 0;
 
@@ -191,7 +204,7 @@ Errors_t Tree_Graph_Dump ( const struct Node_t *tree )
                          "node [shape = record];\n"
                          " \"%p\" ", tree );
 
-    Tree_Dump_Body ( tree, tree_dump );
+    Tree_Dump_Body ( tree, tree_dump, name_storage );
 
     fprintf ( tree_dump, "}\n" );
     fclose ( tree_dump );
@@ -207,34 +220,46 @@ Errors_t Tree_Graph_Dump ( const struct Node_t *tree )
     return OK_TREE;
 }
 
-void Tree_Dump_Body ( const struct Node_t *tree, FILE *tree_dump ) // +     // name
+void Tree_Dump_Body ( const struct Node_t *tree_node, FILE *tree_dump, const Name_t *name_storage ) // +     // name
 {
-    if ( tree == nullptr) {
+    if ( tree_node == nullptr) {
 
         return ;
     }
-    if ( tree->type == NUM ) {
+    if ( tree_node->type == NUM ) {
         fprintf ( tree_dump , " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
-                          " label = \"data: %d \"];\n",tree, tree->value );
+                          " label = \"data: %d \"];\n",tree_node, tree_node->value );
     }
-    else if ( tree->type == VAR ||
-              tree->type == OP ) {
+    else if ( tree_node->type == OP ) {
         fprintf ( tree_dump, " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
-                             " label = \"data: %c \"];\n", tree, tree->value );
+                             " label = \"data: %c \"];\n", tree_node, tree_node->value );
+        printf ( "\n\n %c \n\n", tree_node->value );
     }
-    else {
-        printf ( "Add more options\n" );
+    else if ( tree_node->type == VAR  ||
+              tree_node->type == FUNC ||
+              tree_node->type == FUNC_HEAD ) {
+        fprintf ( tree_dump, " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
+                             " label = \"data: %s \"];\n", tree_node, name_storage[tree_node->value].value );
+    }
+    else if ( tree_node->type == KEY_WORD ) {
+        if ( tree_node->value == KEY_W_IF ) {
+            fprintf ( tree_dump, " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
+                             " label = \"data: %s \"];\n", tree_node,"if" );
+        }
+        else if ( tree_node->value == KEY_W_WHILE ) {
+            fprintf ( tree_dump, " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
+                             " label = \"data: %s \"];\n", tree_node, "while" );
+        }
+    }
+    if ( tree_node->left != nullptr ) {
+        fprintf ( tree_dump, "\"%p\" -> \"%p\" ", tree_node, tree_node->left );
+    }
+    if ( tree_node->right != nullptr ) {
+        fprintf ( tree_dump, "\n \"%p\" -> \"%p\" \n", tree_node, tree_node->right );
     }
 
-    if ( tree->left != nullptr ) {
-        fprintf ( tree_dump, "\"%p\" -> \"%p\" ", tree, tree->left );
-    }
-    if ( tree->right != nullptr ) {
-        fprintf ( tree_dump, "\n \"%p\" -> \"%p\" \n", tree, tree->right );
-    }
-
-    Tree_Dump_Body ( tree->left,  tree_dump );
-    Tree_Dump_Body ( tree->right, tree_dump );
+    Tree_Dump_Body ( tree_node->left,  tree_dump, name_storage );
+    Tree_Dump_Body ( tree_node->right, tree_dump, name_storage );
 }
 
 double Eval ( const struct Node_t *node ) // +

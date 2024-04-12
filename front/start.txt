@@ -1,2 +1,18 @@
-3 = x`
-x = y\.
+main ()
+    3 = x`
+    1 = factorial`
+    0 = i`
+    while` x > i
+    \
+        (i + 1) * factorial = factorial`
+        i + 1 = i`
+    /
+    func ()`
+    if` x < i
+    \
+        i = x`
+    /.
+
+
+func ()
+    3 = z`.

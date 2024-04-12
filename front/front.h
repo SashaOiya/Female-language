@@ -34,14 +34,14 @@ enum Option_t {
     OP_VAR = 'x',  // x
     OP_BRA = '(',  // (
     CL_BRA = ')',  // )
-    OP_POW = '^',   // ^
+    OP_POW = '^',  // ^ // ny okeu
 
-    EQUAL = 11,    // CHANGE !!
-    LIMIT = 12,
-    SLASH = 13,
-    AND = 14,
-    MORE = 16,
-    LESS = 17,
+    EQUAL =  '=',    // CHANGE !!
+    LIMIT = '`',
+    SLASH = '\\',
+    AND = '&',
+    MORE = '>',
+    LESS = '<',
 };
 
 enum Key_Word {
@@ -60,6 +60,7 @@ struct Node_t {
 
 struct Tree_t {
     Node_t *start = nullptr;
+    struct Name_t *name_storage = nullptr;
     //Array
 };
 
@@ -87,9 +88,9 @@ Errors_t File_Reader ( struct File_t *File );
 int GetFileSize ( FILE * f );
 
 //void Analitic ( char *buffer, struct Node_t *tree );
-Errors_t Tree_Graph_Dump ( const struct Node_t *tree );
-void Tree_Dump_Body ( const struct Node_t *tree, FILE *tree_dump );
-void Tree_Text_Dump ( const struct Node_t *tree_node );
+Errors_t Tree_Graph_Dump ( const struct Node_t *tree, const Name_t *name_storage );
+void Tree_Dump_Body ( const struct Node_t *tree_node, FILE *tree_dump, const Name_t *name_storage );
+void Tree_Text_Dump ( const struct Node_t *tree_node, const Name_t *name_storage );
 
 double Eval ( const struct Node_t *node );
 Node_t *Create_Node ( Node_Type_t option, int value, struct Node_t *left, struct Node_t *right );

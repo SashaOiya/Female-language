@@ -1,7 +1,7 @@
 //#include "front.h"
 #include "recurs_des.h"
 
-Node_t *GetG ( char *buffer, struct Node_t *Tree ) //const  // +
+Node_t *GetG ( char *buffer, struct Tree_t *Tree ) //const  // +
 {
     struct Position_t Position = {};
     Position.name_storage = (Name_t *)calloc ( size, sizeof ( Name_t ) ); // change
@@ -10,11 +10,13 @@ Node_t *GetG ( char *buffer, struct Node_t *Tree ) //const  // +
     }
     Position.data = buffer;
     Position.index = 0;
-    // free //my_assert
-    Tree = GetFunc( &Position ); // return
+
+    Tree->start = GetFunc( &Position );
+    Tree->name_storage = Position.name_storage;
+
     //assert ( Position.data[Position.index] == '\0' );
 
-    return Tree;
+    return Tree->start;
 }
 
 Node_t *Get_Number ( struct Position_t *Position )  // +
@@ -42,7 +44,6 @@ Node_t *GetId ( struct Position_t *Position )
         (Position->index)++;
         counter++;
     }
-    //printf ( "arg debug : %s\n", arg); // degug
     if ( Position->data[Position->index] == '(' ) {
         int func_name_code = Search_Func_Name ( arg, Position->name_storage );     // name
         //printf ("func_code = %d\n", func_name_code);  // debug
@@ -52,8 +53,7 @@ Node_t *GetId ( struct Position_t *Position )
 
         return Create_Node ( FUNC, func_name_code, nullptr, val );
     }
-    int cell_n = Search_Var_Name ( arg, Position->name_storage );  // don't save
-    Node_t *val3 = Create_Node ( VAR, cell_n, nullptr, nullptr );
+    Node_t *val3 = Create_Node ( VAR, Search_Var_Name ( arg, Position->name_storage ), nullptr, nullptr );
 
     return val3;
 }
@@ -179,13 +179,14 @@ Node_t *GetFunc ( struct Position_t *Position )  // + comment
             (Position->index)++;
         }
         Node_t* val = GetLim ( Position );    // change name
-        //printf ("dot = %c\n", Position->data[Position->index] ); // debug
         (Position->index)++;
 
         if ( Position->data[Position->index] == '\0' ) { // change
+
             return Create_Node ( FUNC_HEAD, Search_Func_Name ( arg, Position->name_storage ), val, nullptr ); // add more argument
         }
         else {   // wtf     // if '\n'
+
             return Create_Node ( FUNC_HEAD, Search_Func_Name ( arg, Position->name_storage ), val, GetFunc ( Position) );  // this
         }
     }
@@ -206,21 +207,16 @@ Node_t *GetLim ( struct Position_t *Position )   // + comment  // my designation
         counter++;   // counter ++
     }
 
-    if ( strcmp ( arg, "if") == 0 || strcmp ( arg, "while" ) == 0 ) {
-        Node_t* val = nullptr;
-
-        if ( strcmp ( arg, "if" ) == 0 ) {
-            val = Create_Node ( KEY_WORD, KEY_W_IF, GetDifferentCond ( Position ), GetOp ( Position ) ); //NewNode (KWR, IF, val, val2);
-        }
-        else if ( strcmp (arg, "while" ) == 0 ) {
-            val = Create_Node ( KEY_WORD, KEY_W_WHILE, GetDifferentCond ( Position ), GetOp ( Position ) );
-        }
+    if ( strcmp ( arg, "if" ) == 0 || strcmp ( arg, "while" ) == 0 ) {
+        (Position->index) = old_position;
+        Node_t* val = GetCondOp ( Position );
         (Position->index)++;
 
         if ( Position->data[Position->index] != '.' &&  // wtf
              Position->data[Position->index] != '/')   // my designation
         {
             Node_t* val2 = GetLim ( Position );   // name
+
             return Create_Node ( OP, SLASH, val, val2 );
         }
         return Create_Node ( OP, SLASH, val, nullptr );
@@ -253,7 +249,6 @@ Node_t *GetLim ( struct Position_t *Position )   // + comment  // my designation
 Node_t* GetOp ( struct Position_t *Position )
 {
     if ( Position->data[Position->index] == '\\') {
-        printf ("OPPPPP\n");    // degug
         (Position->index)++;
 
         return GetLim ( Position );
@@ -323,5 +318,33 @@ int Search_Var_Name ( char* name, Name_t *name_cell )   // change all
     name_cell[cell].name_code = cell;
 
     return cell;
+}
+
+Node_t* GetCondOp ( struct Position_t* Position )  //
+{
+    char arg[20] = "";
+    int counter = 0;
+    int old_position = Position->index;
+    while ( isalpha ( Position->data[Position->index] ) != 0 )
+    {
+        sprintf (arg + counter, "%c", Position->data[Position->index] );
+        (Position->index)++;
+        counter++;
+    }
+    if ( strcmp ( arg, "if" ) == 0 )
+    {
+        Node_t* val = GetDifferentCond ( Position );
+        Node_t* val2 = GetOp ( Position );
+
+        return Create_Node ( KEY_WORD, KEY_W_IF, val, val2);
+    }
+    else if (strcmp (arg, "while") == 0)
+    {
+        Node_t* val = GetDifferentCond ( Position );
+        Node_t* val2 = GetOp ( Position );
+
+        return Create_Node ( KEY_WORD, KEY_W_WHILE, val, val2);
+    }
+    return 0;
 }
 
