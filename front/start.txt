@@ -1,18 +1,13 @@
 main ()
-    3 = x`
-    1 = factorial`
-    0 = i`
-    while` x > i
-    \
-        (i + 1) * factorial = factorial`
-        i + 1 = i`
-    /
-    func ()`
-    if` x < i
-    \
-        i = x`
-    /.
-
-
-func ()
-    3 = z`.
+{
+	bla = 3;
+	if ( bla > 2 ) {
+		while ( x < 3 ) {
+			;
+		}
+	}
+	else { 
+		lox = 3;
+	}
+	return ;
+}
