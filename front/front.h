@@ -5,31 +5,14 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
 #include "log.h"
+#include "dynamic_array.h"
 
-#ifdef DEBUG
-#define $ printf ( "function <%s> line <%d>\n ", __PRETTY_FUNCTION__, __LINE__ );
-#else
-#define $
-#endif
-
-const int CELL_SIZE = 10;
-
-enum Node_Type_t {
-    FREE_CELL        = 0,
-    NODE_TYPE_NUM    = 1,
-    NODE_TYPE_OP     = 2,
-    NODE_TYPE_VAR    = 3,
-    NODE_TYPE_FUNC   = 4,
-    NODE_TYPE_IF     = 5,
-    NODE_TYPE_WHILE  = 6,
-    NODE_TYPE_ELSE   = 7,
-    NODE_TYPE_RETURN = 8
-};
+//int CELL_SIZE = 10;
+const int cell_mul_coeff = 2;
 
 enum Option_t {
     OP_ADD = '+',  // +
@@ -53,13 +36,6 @@ enum Option_t {
     CL_W_BRA = '}'
 };
 
-enum Key_Word {
-    KEY_W_IF = 1,
-    KEY_W_WHILE = 2,
-    KEY_W_D     = 3,
-    KEY_W_DONT  = 4
-}; // more words
-
 struct Node_t {
     int value      = {};
     Node_Type_t type;
@@ -73,30 +49,9 @@ struct Tree_t {
     //Array
 };
 
-enum Errors_t {
-    OK_TREE   = 0,
-    ERR_FREAD = 1,
-    ERR_INPUT = 2,
-    ERR_FOPEN = 3,
-    ERR_RLINE = 4,
-    ERR_CALLO = 5,
-    ERR_CYCLE = 6,
-    ERR_CTYPE = 7,
-    OK_FILE   = 8,
-    OK_OCCURR = 9
-};
-
 struct File_t {
-    char *file_name = nullptr;
-    FILE *front_f = nullptr;
     char *out_buffer = nullptr;
     int file_size = 0;
-    struct Name_t *name_storage = nullptr;
-};
-
-struct Token_t {
-    Node_Type_t type;
-    int cell_code = 0;
 };
 
 struct Name_Cell_t {
@@ -105,8 +60,16 @@ struct Name_Cell_t {
     char *data = nullptr; // char*
 };
 
-Errors_t File_Reader ( struct File_t *File );
-int GetFileSize ( FILE * f );
+struct Language_t {
+    struct Tree_t Tree = {};
+    struct File_t file = {};
+    struct Name_Cell_t *name_cell = nullptr;
+    int cell_n = 2;
+    struct Dynamic_Array_t d_array = {};
+};
+
+Errors_t File_Reader ( struct File_t *File, FILE *input_f );
+int Get_File_Size ( FILE * f );
 
 //void Analitic ( char *buffer, struct Node_t *tree );
 void Tree_Dump_Body ( const struct Node_t *tree, FILE *tree_dump );// name_storage
@@ -131,9 +94,11 @@ void File_Write_Asm_Text ( const struct Node_t *tree, FILE *start_f );
 
 const char *Get_Op_Name ( int op_type );
 
-void Search_Tokens ( const struct File_t *file, Name_Cell_t *name_cell, struct Dynamic_Array_t *d_array );
-int Search_Var_Name ( char* name, Name_Cell_t *name_cell );
-int Search_Free_Cell ( Name_Cell_t *name_cell );
-int Search_Func_Name ( char* name, Name_Cell_t *name_cell );
+void Search_Tokens ( struct Language_t *language );
+int Search_Var_Name ( struct Language_t *language, char* name );
+int Search_Free_Cell ( struct Language_t *language );
+int Search_Func_Name ( struct Language_t *language, char* name );
+
+Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name );
 
 #endif  // FRONT_END

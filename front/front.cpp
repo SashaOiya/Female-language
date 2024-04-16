@@ -1,68 +1,73 @@
 #include "recurs_des.h"
 #include "front.h"
-#include "dynamic_array.h"
-// Ctor
 // Dtor[[[[[[[[[[[[[[[[
 static const int DUMP_COUNTER = 100;
 
 int main ( int argc, char *argv[] )
 {
-    struct Tree_t Tree = {};
-    struct File_t file = {};
-    file.file_name = argv[1];
-    File_Reader ( &file );   // to Ctor
+    struct Language_t language = {};
 
-    file.out_buffer = File_Skip_Spaces ( file.out_buffer, file.file_size );
-    printf ( "%s\n", file.out_buffer ); // debug
-                                                           // hyita
-    struct Name_Cell_t *name_cell = (Name_Cell_t *)calloc ( CELL_SIZE * sizeof ( Name_Cell_t ), 1); // realloc ctor dtor
-    struct Dynamic_Array_t d_array = {};
-    Dymanic_Array_Ctor ( &d_array );   // dtor
-    Search_Tokens ( &file, name_cell, &d_array );
+    Language_Ctor ( &language, ( argc > 0 ) ? argv[1] : nullptr );
 
     //Tree.start = Get_General ( File.out_buffer, Tree.start );
 
     //Tree_Graph_Dump ( Tree.start );
     //Tree_Text_Dump ( Tree.start );
 
-    //FromType_ToOption ( Tree.start );
-
-    //File_Write_Front ( Tree.start );
-
-    //printf ( "%g\n", Eval ( tree.start ) );
-    //Optimization_Const ( tree.start );
-    //Node_t *tree_c = d ( Tree.start );  // Tree_c
-
-    //Tree_Graph_Dump ( tree_c );
-    //Tree_Text_Dump ( tree_c );
-
-    fclose ( file.front_f );
-
     return 0;
 }
 
-void Search_Tokens ( const struct File_t *file, Name_Cell_t *name_cell, struct Dynamic_Array_t *d_array )
+Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name )
 {
-    assert ( file != nullptr );
-    assert ( name_cell != nullptr );
-    assert ( d_array != nullptr );
+    assert ( language != nullptr );
+    assert ( input_file_name != nullptr );
 
-    for ( int i = 0; i < file->file_size; ) {
+    FILE *input_f = fopen ( input_file_name, "r" );
+    if ( !input_f ) {
+
+        return ERR_FOPEN;
+    }
+
+    language->name_cell = (Name_Cell_t *)calloc ( language->cell_n * sizeof ( Name_Cell_t ), 1);
+    //if ( File_Reader ( &language->file, input_f ) != OK_FILE ) {
+
+    //    return ERR_FREAD;
+    //
+    File_Reader ( &language->file, input_f );
+
+    language->file.out_buffer = File_Skip_Spaces ( language->file.out_buffer, language->file.file_size );
+    printf ( "%s\n", language->file.out_buffer ); // debug
+
+    Dymanic_Array_Ctor ( &language->d_array );   // dtor
+    Search_Tokens ( language );
+    // errors
+
+    fclose ( input_f );
+
+    return NO_ERR;
+}
+
+void Search_Tokens ( struct Language_t *language )
+{
+    assert ( language != nullptr );
+
+    for ( int i = 0; i < language->file.file_size; ) {
         char element_name[20] = {};
         int counter = 0;
         Token_t token = {};
 
-        for ( ; isalpha ( file->out_buffer[i] ); ++i, ++counter )  {    //
-            element_name[counter] = file->out_buffer[i];
+        for ( ; isalpha ( language->file.out_buffer[i] ); ++i, ++counter )  {    //
+            element_name[counter] = language->file.out_buffer[i];
         }
 $       element_name[counter] = '\0';
 
-        if ( counter > 0 && file->out_buffer[i]   == '(' &&
-                            file->out_buffer[i+1] == ')' ) {
+        if ( counter > 0 && language->file.out_buffer[i]   == '(' &&
+                            language->file.out_buffer[i+1] == ')' ) {
             token.type = NODE_TYPE_FUNC;
-            token.cell_code = Search_Func_Name ( element_name, name_cell );
+            token.cell_code = Search_Func_Name ( language, element_name );
 $
         }
+        // new variable
         else if ( counter > 0 ) {
             if ( strcmp ( element_name, "if" ) == 0 ) {
                 token.type = NODE_TYPE_IF;
@@ -78,12 +83,12 @@ $
             }
             else {
 $               token.type = NODE_TYPE_VAR;
-$               token.cell_code = Search_Var_Name ( element_name, name_cell );
+$               token.cell_code = Search_Var_Name ( language, element_name );
 $           }
         }
         else if ( counter == 0 ) {
-            for ( ; isdigit ( file->out_buffer[i] ); ++i, ++counter )  {    //
-                element_name[counter] = file->out_buffer[i];
+            for ( ; isdigit ( language->file.out_buffer[i] ); ++i, ++counter )  {    //
+                element_name[counter] = language->file.out_buffer[i];
             }
 $           element_name[counter] = '\0';
             if ( counter > 0 ) {
@@ -92,98 +97,107 @@ $               token.cell_code = atoi ( element_name );
             }
             else {
                 token.type = NODE_TYPE_OP;
-$               token.cell_code = file->out_buffer[i];
+$               token.cell_code = language->file.out_buffer[i];
                 ++i;
             }
         }
 $
-        Dynamic_Array_Push ( d_array, token );
+        Dynamic_Array_Push ( &(language->d_array), token );
     }
-    Dynamic_Array_Dump ( d_array, INFORMATION );
+    Dynamic_Array_Dump ( &(language->d_array), INFORMATION );
 }
 
-int Search_Func_Name ( char* name, Name_Cell_t *name_cell )   // change all
+int Search_Func_Name ( struct Language_t *language, char* name ) // +
 {
-    assert ( name_cell != nullptr );
+    assert ( language != nullptr );
+    assert ( name != nullptr );
 
-    for ( int i = 0; i < CELL_SIZE; ++i ) {
-$       if ( name_cell[i].type == NODE_TYPE_FUNC ) {
-            if ( strcmp ( name, name_cell[i].data ) == 0) {
+    for ( int i = 0; i < language->cell_n; ++i ) {
+$       if ( language->name_cell[i].type == NODE_TYPE_FUNC ) {
+            if ( strcmp ( name, language->name_cell[i].data ) == 0) {
 $
-                return name_cell[i].name_code;
+                return language->name_cell[i].name_code;
             }
         }
     }
 $
-    int cell = Search_Free_Cell ( name_cell );
-    name_cell[cell].type = NODE_TYPE_FUNC;
-    name_cell[cell].data = strdup ( name );  // free
-    name_cell[cell].name_code = cell;
+    int cell = Search_Free_Cell ( language );
+    language->name_cell[cell].type = NODE_TYPE_FUNC;
+    language->name_cell[cell].data = strdup ( name );  // free
+    language->name_cell[cell].name_code = cell;
 
     return cell;
 }
 
-int Search_Free_Cell ( Name_Cell_t *name_cell ) // change all
+int Search_Free_Cell ( struct Language_t *language )  // +
 {
-    for (int i = 0; i < CELL_SIZE; ++i) {
-        if ( name_cell[i].type == FREE_CELL ) {
+    assert ( language != nullptr );
+
+    for ( int i = 0; i < language->cell_n; ++i ) {
+        if ( language->name_cell[i].type == FREE_CELL ) {
 $
             return i;
         }
     }
-    //name_cell = (Name*)realloc (name_cell, size * 2); // ïåðåäàòü íîâîå çíà÷åíèå size
-    //return size; // îïÿòü æå ýòî åùå ñòàðîå çíà÷åíèå, íóæíî ïîìåíÿòü
-    return 0; ///
+    language->cell_n *= cell_mul_coeff;
+    const int n_bytes = ( language->cell_n / 2 ) * sizeof ( Name_Cell_t );
+    language->name_cell = (Name_Cell_t *)realloc ( language->name_cell, n_bytes * 2 );  // free
+    assert ( language->name_cell != nullptr );  // assert
+    memset (  (Name_Cell_t *)( (char *)language->name_cell + n_bytes ), 0, n_bytes );
+$
+    return Search_Free_Cell ( language );
 }
 
-int Search_Var_Name ( char* name, Name_Cell_t *name_cell )   // change all
+int Search_Var_Name ( struct Language_t *language, char* name )  // +
 {
-    //assert
+    assert ( language != nullptr );
+    assert ( name     != nullptr );
 
-    for ( int i = 0; i < CELL_SIZE; ++i ) {
-$       if ( name_cell[i].type == NODE_TYPE_VAR ) {
-            if ( strcmp ( name, name_cell[i].data ) == 0 ) {
+    for ( int i = 0; i < language->cell_n; ++i ) {
+$       if ( language->name_cell[i].type == NODE_TYPE_VAR ) {
+            if ( strcmp ( name, language->name_cell[i].data ) == 0 ) {
 $
-                return name_cell[i].name_code;
+                return language->name_cell[i].name_code;
             }
         }
     }
-    int cell = Search_Free_Cell ( name_cell );
-    name_cell[cell].type = NODE_TYPE_VAR;
-    //name_cell[cell].value = ( char *)calloc ( size, sizeof ( char ) );
-    name_cell[cell].data = strdup (name);
-    name_cell[cell].name_code = cell;
+    int cell = Search_Free_Cell ( language );
+    language->name_cell[cell].type = NODE_TYPE_VAR;
+    language->name_cell[cell].data = strdup (name); // free
+    language->name_cell[cell].name_code = cell;
 
     return cell;
 }
 
-Errors_t File_Reader ( struct File_t *File )
+Errors_t File_Reader ( struct File_t *file, FILE *input_f )
 {
-    File->front_f = fopen ( File->file_name, "r" );
-    assert ( File->front_f != nullptr );   // assert
+    assert ( file != nullptr );
+    assert ( input_f != nullptr );
 
-    File->file_size = GetFileSize ( File->front_f );
+    file->file_size = Get_File_Size ( input_f );
 
-    File->out_buffer = ( char *)calloc ( File->file_size + 1, sizeof ( char ) );
-    assert ( File->out_buffer != nullptr ); // assert
+    file->out_buffer = ( char *)calloc ( file->file_size + 1, sizeof ( char ) );
+    if ( !file->out_buffer ) {
 
-    int ret_code = fread ( File->out_buffer, sizeof( File->out_buffer[0] ), File->file_size, File->front_f );
-    if ( ret_code != File->file_size ) {
-        if ( feof ( File->front_f ) ) {
+        return ERR_CALLO;
+    }
+
+    int ret_code = fread ( file->out_buffer, sizeof( file->out_buffer[0] ), file->file_size, input_f );
+    printf ( "buff_size %d\tret_code %d\n", file->file_size, ret_code );  //aaaaaaaaa
+    if ( ret_code != file->file_size  ) {
+        if ( feof ( input_f ) ) {
             printf ( "Error reading test.bin: unexpected end of file\n" );
         }
-        else if ( ferror ( File->front_f ) ) {
+        else if ( ferror ( input_f ) ) {
             perror ( "Error reading test.bin" );
         }
         return ERR_FREAD;
     }
 
-    fclose ( File->front_f );
-
     return OK_FILE;
 }
 
-int GetFileSize ( FILE * f ) // +
+int Get_File_Size ( FILE * f ) // +
 {
     int prev = ftell ( f );
 
@@ -226,50 +240,6 @@ char *File_Skip_Spaces ( char *data, int file_size )
 
     return buffer;
 }
-
-/*void Analitic ( char *buffer, struct Node_t *tree )
-{
-    if ( tree == nullptr || buffer == '\0' ) {
-
-        return ;
-    }
-    buffer = Skip_Spaces ( buffer );
-    char *start = buffer;
-
-    tree->type = OP;
-
-    if ( isdigit ( *buffer ) ) {
-        while ( isdigit ( *buffer ) ) {
-            ++buffer;
-        }
-        tree->type = NUM;
-        tree->value = atoi ( start );
-
-        //Analitic ( buffer, tree->left );
-        //Analitic ( buffer, tree->right );
-    }
-
-    if      ( *buffer == '-' ) {
-         tree->value = OP_SUB;
-    }
-    else if ( *buffer == '+' ) {
-        tree->value = OP_ADD;
-    }
-    else if ( *buffer == '/' ) {
-        tree->value = OP_DIV;
-    }
-    else if ( *buffer == '*' ) {
-        tree->value = OP_MUL;
-    }
-    else if ( *buffer == 'x' ) {
-        tree->type = VAR;
-        tree->value = OP_VAR;
-    }
-    ++buffer;  //error
-    Analitic ( buffer, tree->left );
-    Analitic ( buffer, tree->right );
-
-} */
 
 void Tree_Text_Dump ( const struct Node_t *tree_node ) // +
 {

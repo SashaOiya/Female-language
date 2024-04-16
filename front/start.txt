@@ -1,13 +1,16 @@
 main ()
 {
-	bla = 3;
-	if ( bla > 2 ) {
-		while ( x < 3 ) {
-			;
+	lox = 3;
+	x = 5;
+	y = 6;
+	if ( lox > 3 ) {
+		while ( lox < 5 ) {
+			lox = lox + 1;
 		}
 	}
-	else { 
-		lox = 3;
+	else {
+		los = 3!
 	}
 	return ;
 }
+	  
