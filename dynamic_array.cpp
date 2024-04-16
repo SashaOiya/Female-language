@@ -1,19 +1,19 @@
 #include "dynamic_array.h"
 
-Error_t Dymanic_Array_Ctor ( struct Dynamic_Array_t *d_array )
+Errors_t Dymanic_Array_Ctor ( struct Dynamic_Array_t *d_array )
 {
     assert ( d_array != nullptr );
 
     d_array->data = (Token_t *)calloc( d_array->size * sizeof ( Token_t ), 1 );
     if ( !d_array->data ) {
 
-        return MEMMORY_ERR;
+        return ERR_CALLO;
     }
 $
     return NO_ERR;
 }
 
-Error_t Dynamic_Array_Resize ( struct Dynamic_Array_t *d_array )
+Errors_t Dynamic_Array_Resize ( struct Dynamic_Array_t *d_array )
 {
     assert ( d_array != nullptr );
 
@@ -22,7 +22,7 @@ Error_t Dynamic_Array_Resize ( struct Dynamic_Array_t *d_array )
     Token_t *new_dynamic_array = (Token_t *)calloc ( d_array->size * sizeof ( Token_t ), 1 );
     if ( !new_dynamic_array ) {
 
-        return MEMMORY_ERR;
+        return ERR_CALLO;
     }
 
     memcpy ( new_dynamic_array, d_array->data, d_array->size * ( sizeof ( Token_t ) / d_array_mul_coeff ) );

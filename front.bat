@@ -1,1 +1,1 @@
-g++ log.cpp recurs_des.cpp front.cpp
+g++ log.cpp recurs_des.cpp front.cpp dynamic_array.cpp
