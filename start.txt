@@ -1,16 +1,1 @@
-main ()
-{
-	lox = 3;
-	x = 5;
-	y = 6;
-	if ( lox > 3 ) {
-		while ( lox < 5 ) {
-			lox = lox + 1;
-		}
-	}
-	else {
-		los = 3!
-	}
-	return ;
-}
-	  
+x = ( 7 * 9 -( 8 * 1 ) ) - (8+ 6) + x

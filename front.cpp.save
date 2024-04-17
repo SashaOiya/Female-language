@@ -523,7 +523,7 @@ Node_t *c ( const struct Node_t *tree )  // +
     return Create_Node ( tree->type, tree->value, tree->left, tree->right );
 }
 
-int Optimization_Const ( struct Node_t *tree ) // -
+int Optimization_Const ( struct Node_t *tree ) // +
 {
 $   if ( tree == nullptr || tree->right == nullptr || tree->left == nullptr ) {
 
@@ -545,7 +545,7 @@ $       return ( Optimization_Const ( tree->left ) ||
     }
 }
 
-int Optimization_Option ( struct Node_t **tree )  // -
+int Optimization_Option ( struct Node_t **tree )  // +
 {
 $   if ( (*tree) == nullptr  ) {
 
@@ -581,7 +581,7 @@ $       return ( Optimization_Option ( &(*tree)->left ) ||
     }
 }
 
-void Optimization ( struct Node_t *tree )  // -
+void Optimization ( struct Node_t *tree )  // +
 {
     int occurrences_n = 0;
     int prev_occuttences_n = 0;

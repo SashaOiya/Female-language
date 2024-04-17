@@ -41,6 +41,7 @@ struct Node_t {
     Node_Type_t type;
     Node_t *left     = 0;
     Node_t *right    = 0;
+    int token_n  = 0;
 };
 
 struct Tree_t {
@@ -61,7 +62,7 @@ struct Name_Cell_t {
 };
 
 struct Language_t {
-    struct Tree_t Tree = {};
+    struct Tree_t tree = {};
     struct File_t file = {};
     struct Name_Cell_t *name_cell = nullptr;
     int cell_n = 2;
@@ -72,8 +73,8 @@ Errors_t File_Reader ( struct File_t *File, FILE *input_f );
 int Get_File_Size ( FILE * f );
 
 //void Analitic ( char *buffer, struct Node_t *tree );
-void Tree_Dump_Body ( const struct Node_t *tree, FILE *tree_dump );// name_storage
-Errors_t Tree_Graph_Dump ( const struct Node_t *tree );
+void Tree_Dump_Body ( const struct Language_t *language, const struct Node_t *tree, FILE *tree_dump );
+Errors_t Tree_Graph_Dump (const struct Language_t *language );
 void Tree_Text_Dump ( const struct Node_t *tree_node );
 
 double Eval ( const struct Node_t *node );
