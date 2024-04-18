@@ -20,9 +20,9 @@ else -> только вместе мы сильны
 main -> алфея
 
 Var_Def := ident '=' Get_Comparison ';'
-Func_Def := ident '(' ')' Statement_List 
+Func_Def := [ ident '(' ')' Statement_List ]* 
 Statement_List := '{' [statement]* '}'
-statement := Get_Comparison | If | While | 
+statement := Var_Def | If | While | Get_Func ( ident '(' ')' ';' ) | ';' // comparison
 While := 'while' '(' Get_Comparison ')' Statement_List
 If := 'if' '(' Get_Comparison ')' Statement_List
 Get_Comparison := Get_Exp  [ [ '>', '<', '==' ] Get_exp ]*

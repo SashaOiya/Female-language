@@ -256,9 +256,8 @@ void Tree_Text_Dump ( const struct Node_t *tree_node ) // +
     if ( tree_node->type == NODE_TYPE_NUM ) {
         printf ( "%d", tree_node->value );
     }
-    else if ( tree_node->type == NODE_TYPE_OP ||
-              tree_node->type == NODE_TYPE_VAR ) {
-        printf ( "%s", Get_Op_Name ( tree_node->value ) );
+    else  {
+        printf ( "%s", Get_Op_Name ( tree_node ) );
     }
 
     Tree_Text_Dump ( tree_node->right );
@@ -315,29 +314,10 @@ void Tree_Dump_Body ( const struct Language_t *language, const struct Node_t *tr
     Tree_Dump_Body ( language, tree->right, tree_dump );
 }
 
-const char *Get_Op_Name ( int op_type )  // remove naxyi
+const char *Get_Op_Name ( const struct Node_t *tree_node )  // remove naxyi
 {
-    switch ( op_type ) {
-        case OP_SIN : {
-
-            return "sin";
-        }
-        break;
-        case OP_COS : {
-
-            return "cos";
-        }
-        break;
-        case OP_TG  : {
-
-            return "tg";
-        }
-        break;
-        case OP_CTG : {
-
-            return "ctg";
-        }
-        break;
+    if ( tree_node->type == NODE_TYPE_OP ) {
+    switch ( tree_node->value ) {
         case OP_ADD : {
 
             return "+";
@@ -383,9 +363,37 @@ const char *Get_Op_Name ( int op_type )  // remove naxyi
             return "=";
         }
         break;
+        case OP_SEMICLON : {
+
+            return ";";
+        }
+        break;
+        case OP_W_BRA : {
+
+            return "{";
+        }
+        break;
+        case CL_W_BRA : {
+
+            return "}";
+        }
+        break;
         default : {
             printf ( "Error\n" );
         }
+    }
+    }
+    else if ( tree_node->type == NODE_TYPE_IF ) {
+
+        return "if";
+    }
+    else if ( tree_node->type == NODE_TYPE_WHILE ) {
+
+        return "while";
+    }
+    else if ( tree_node->type == NODE_TYPE_VAR ) {  // hyita
+
+        return "x";
     }
 $
     return "error";

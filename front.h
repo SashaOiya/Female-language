@@ -33,7 +33,8 @@ enum Option_t {
     OP_LESS  = '<', // <
     OP_SEMICLON = ';',
     OP_W_BRA = '{',
-    CL_W_BRA = '}'
+    CL_W_BRA = '}',
+    OP_CONNECT = '`'
 };
 
 struct Node_t {
@@ -93,7 +94,7 @@ void Optimization ( struct Node_t *tree );
 void File_Write_Front ( const struct Node_t *tree );
 void File_Write_Asm_Text ( const struct Node_t *tree, FILE *start_f );
 
-const char *Get_Op_Name ( int op_type );
+const char *Get_Op_Name ( const struct Node_t *tree_node );
 
 void Search_Tokens ( struct Language_t *language );
 int Search_Var_Name ( struct Language_t *language, char* name );

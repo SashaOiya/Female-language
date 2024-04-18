@@ -9,7 +9,7 @@ Node_t *Get_General ( struct Language_t *language )
     position.data = language->d_array.data;
     assert ( position.data != nullptr );
     position.index = 0;
-    language->tree.start = Get_Comparison ( &position );
+    language->tree.start = Get_Statement_List ( &position );
 
     return language->tree.start;
 }
@@ -83,7 +83,7 @@ Node_t *Get_Partititon ( struct Position_t *position )
 
         (position->index)++;
         prev_cell = position->index;
-        new_node =  Get_Expression ( position );
+        new_node =  Get_Comparison ( position );
         (position->index)++;
 
         return new_node;
@@ -133,5 +133,69 @@ Node_t *Get_Comparison ( struct Position_t *position )
     }
 
     return exp_node;
+}
+
+Node_t *Get_Statement_List ( struct Position_t *position )
+{
+    assert ( position != nullptr );
+
+    struct Node_t *new_node = nullptr;
+    int prev_cell = 0;
+
+    if ( position->data[position->index].type == NODE_TYPE_OP &&
+         position->data[position->index].cell_code == '{' ) {  // assert  ( == '{' );
+
+        (position->index)++;
+        //prev_cell = position->index;
+        while ( position->data[position->index].type == NODE_TYPE_IF ||
+                position->data[position->index].type == NODE_TYPE_WHILE ||
+                position->data[position->index].type == NODE_TYPE_VAR ||
+                position->data[position->index].type == NODE_TYPE_FUNC ||
+                ( position->data[position->index].type == NODE_TYPE_OP && position->data[position->index].cell_code == OP_SEMICLON ) ) {
+
+            if ( position->data[position->index].type == NODE_TYPE_IF ||
+                 position->data[position->index].type == NODE_TYPE_WHILE ) {
+                Node_Type_t prev_type = position->data[position->index].type;
+                int prev_cell = position->index;  //
+                (position->index)++;
+
+                assert ( position->data[position->index].cell_code == '(' );
+
+                Node_t *comp_node_left = Get_Comparison ( position );   // >   <
+
+                assert  ( position->data[position->index].cell_code == '{' );
+
+                new_node = Get_Statement_List ( position );
+
+                new_node = Create_Node ( prev_type, 0, comp_node_left, new_node );     // 0
+                new_node->token_n = prev_cell;
+
+                //assert ( position->data[position->index].cell_code == '}' );
+            }
+            else if ( position->data[position->index].type == NODE_TYPE_OP &&
+                      position->data[position->index].cell_code == OP_SEMICLON ) {
+                prev_cell = position->index;
+                (position->index)++;
+                new_node = Create_Node ( NODE_TYPE_OP, OP_SEMICLON, nullptr, nullptr );
+                new_node->token_n = prev_cell;
+
+                //assert ( position->data[position->index].cell_code == '}' );
+            }
+            else if ( position->data[position->index].type == NODE_TYPE_VAR ) {
+                printf ( "LOX\n" );
+                new_node = Get_Comparison ( position );
+                assert ( position->data[position->index].cell_code == ';' );
+                //(position->index)++;
+            }
+            //assert ( position->data[position->index].cell_code == '}' );
+            (position->index)++;     // maybe not
+
+            //new_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, new_node, nullptr ); //not nullptr
+        }
+        return new_node;
+        //assert ( position->data[position->index].cell_code == '}' );
+    }
+
+    return new_node;
 }
 

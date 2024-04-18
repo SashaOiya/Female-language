@@ -256,8 +256,7 @@ void Tree_Text_Dump ( const struct Node_t *tree_node ) // +
     if ( tree_node->type == NODE_TYPE_NUM ) {
         printf ( "%d", tree_node->value );
     }
-    else if ( tree_node->type == NODE_TYPE_OP ||
-              tree_node->type == NODE_TYPE_VAR ) {
+    else  {
         printf ( "%s", Get_Op_Name ( tree_node->value ) );
     }
 
@@ -318,26 +317,6 @@ void Tree_Dump_Body ( const struct Language_t *language, const struct Node_t *tr
 const char *Get_Op_Name ( int op_type )  // remove naxyi
 {
     switch ( op_type ) {
-        case OP_SIN : {
-
-            return "sin";
-        }
-        break;
-        case OP_COS : {
-
-            return "cos";
-        }
-        break;
-        case OP_TG  : {
-
-            return "tg";
-        }
-        break;
-        case OP_CTG : {
-
-            return "ctg";
-        }
-        break;
         case OP_ADD : {
 
             return "+";
@@ -523,7 +502,7 @@ Node_t *c ( const struct Node_t *tree )  // +
     return Create_Node ( tree->type, tree->value, tree->left, tree->right );
 }
 
-int Optimization_Const ( struct Node_t *tree ) // +
+int Optimization_Const ( struct Node_t *tree ) // -
 {
 $   if ( tree == nullptr || tree->right == nullptr || tree->left == nullptr ) {
 
@@ -545,7 +524,7 @@ $       return ( Optimization_Const ( tree->left ) ||
     }
 }
 
-int Optimization_Option ( struct Node_t **tree )  // +
+int Optimization_Option ( struct Node_t **tree )  // -
 {
 $   if ( (*tree) == nullptr  ) {
 
@@ -581,7 +560,7 @@ $       return ( Optimization_Option ( &(*tree)->left ) ||
     }
 }
 
-void Optimization ( struct Node_t *tree )  // +
+void Optimization ( struct Node_t *tree )  // -
 {
     int occurrences_n = 0;
     int prev_occuttences_n = 0;

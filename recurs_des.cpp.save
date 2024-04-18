@@ -1,15 +1,17 @@
 //#include "front.h"
 #include "recurs_des.h"
 
-Node_t *Get_General ( const struct Language_t *language, struct Node_t *tree_node )
+Node_t *Get_General ( struct Language_t *language )
 {
+    assert ( language != nullptr );
+
     struct Position_t position = {};
     position.data = language->d_array.data;
     assert ( position.data != nullptr );
     position.index = 0;
-    tree_node = Get_Comparison ( &position );
+    language->tree.start = Get_Statement_List ( &position );
 
-    return tree_node;
+    return language->tree.start;
 }
 
 int Get_Binary_Element ( const struct Token_t token, const enum Mode_t mode )
@@ -35,10 +37,11 @@ int Get_Binary_Element ( const struct Token_t token, const enum Mode_t mode )
 
 Node_t *Get_Expression ( struct Position_t *position )
 {
+    assert ( position != nullptr );
+
     Node_t *term_node = Get_Term ( position );
 
-    int element = 0;
-    while ( ( element = Get_Binary_Element ( position->data[position->index], MODE_ADD_SUB ) ) != 0 ) {
+    for ( int element = 0;( element = Get_Binary_Element ( position->data[position->index], MODE_ADD_SUB ) ) != 0; ) {
         int prev_cell = position->index;
         (position->index)++;
         Node_t *term_node_right = Get_Term ( position );
@@ -52,17 +55,17 @@ Node_t *Get_Expression ( struct Position_t *position )
 
 Node_t *Get_Term ( struct Position_t *position )
 {
+    assert ( position != nullptr );
+
     Node_t *part_node = Get_Power ( position );
 
-    int element = 0;  // char
-    while ( ( element = Get_Binary_Element ( position->data[position->index], MODE_MUL_DIV ) ) != 0 ) {
+    for ( int element = 0; ( element = Get_Binary_Element ( position->data[position->index], MODE_MUL_DIV ) ) != 0; ) {
         int prev_cell = position->index;
         (position->index)++;
         Node_t *part_node_right = Get_Power ( position );
 
         part_node = Create_Node( NODE_TYPE_OP, element, part_node, part_node_right );
         part_node->token_n = prev_cell;
-        printf ( "term cell %d\n", prev_cell ); //
     }
 
     return part_node;
@@ -79,20 +82,19 @@ Node_t *Get_Partititon ( struct Position_t *position )
          position->data[position->index].cell_code == '(' ) {
 
         (position->index)++;
-        prev_cell = position->index;       
-        new_node =  Get_Expression ( position ); 
+        prev_cell = position->index;
+        new_node =  Get_Comparison ( position );
         (position->index)++;
 
         return new_node;
     }
     else {
         prev_cell = position->index;
-
         new_node = Create_Node ( position->data[position->index].type,
                                  position->data[position->index].cell_code, nullptr, nullptr );
     }
     (position->index)++;
-    new_node->token_n = prev_cell;       
+    new_node->token_n = prev_cell;
 
     return new_node;
 }
@@ -121,7 +123,7 @@ Node_t *Get_Comparison ( struct Position_t *position )
 
     Node_t *exp_node = Get_Expression ( position );
 
-    for ( int element = 0; element = Get_Binary_Element ( position->data[position->index], MODE_MORE_LESS_EQUAL ) != 0;  ) {
+    for ( int element = 0; ( element = Get_Binary_Element ( position->data[position->index], MODE_MORE_LESS_EQUAL ) ) != 0;  ) {
         int prev_cell = position->index;
         (position->index)++;
         Node_t *exp_node_right = Get_Expression ( position );
@@ -131,5 +133,42 @@ Node_t *Get_Comparison ( struct Position_t *position )
     }
 
     return exp_node;
+}
+
+Node_t *Get_Statement_List ( struct Position_t *position )
+{
+    assert ( position != nullptr );
+
+    struct Node_t *new_node = nullptr;
+    int prev_cell = 0;
+
+    if ( position->data[position->index].type == NODE_TYPE_OP &&
+         position->data[position->index].cell_code == '{' ) {  // assert  ( == '{' );
+
+        (position->index)++;
+        //prev_cell = position->index;
+        while ( position->data[position->index].type == NODE_TYPE_IF ||
+                position->data[position->index].type == NODE_TYPE_WHILE ||
+                position->data[position->index].type == NODE_TYPE_VAR ||
+                position->data[position->index].type == NODE_TYPE_FUNC ||
+                ( position->data[position->index].type == NODE_TYPE_OP && position->data[position->index].cell_code == OP_SEMICLON ) ) {
+
+            //assert ( position->data[position->index].cell_code == '}' );
+            (position->index)++;     // maybe not
+
+            new_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, new_node, nullptr ); //not nullptr
+        }
+        
+        return new_node;
+        //assert ( position->data[position->index].cell_code == '}' );
+    }
+
+    return new_node;
+}
+
+Node_t *Get_Statement () 
+{
+    
+    return new_node;
 }
 
