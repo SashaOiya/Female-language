@@ -139,7 +139,7 @@ Node_t *Get_Statement_List ( struct Position_t *position )
 {
     assert ( position != nullptr );
 
-    struct Node_t *new_node = nullptr; //Create_Node ( NODE_TYPE_OP, OP_CONNECT, nullptr, nullptr );
+    struct Node_t *new_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, nullptr, nullptr );
     struct Node_t *start_node = new_node;
     int prev_cell = 0;
 
@@ -161,7 +161,7 @@ Node_t *Get_Statement_List ( struct Position_t *position )
             //}
             //new_node->right = state_node;
             //new_node = new_node->right;
-            new_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, state_node, new_node );
+            new_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, new_node, state_node );
             //new_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, new_node, nullptr ); //not nullptr
         }
 

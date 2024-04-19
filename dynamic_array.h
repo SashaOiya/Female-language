@@ -46,6 +46,7 @@ enum Errors_t {
 struct Token_t {
     Node_Type_t type;
     int cell_code = 0;
+    char *data = {};
 };
 
 struct Dynamic_Array_t {

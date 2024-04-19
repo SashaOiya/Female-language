@@ -33,7 +33,8 @@ enum Option_t {
     OP_LESS  = '<', // <
     OP_SEMICLON = ';',
     OP_W_BRA = '{',
-    CL_W_BRA = '}'
+    CL_W_BRA = '}',
+    OP_CONNECT = '`'
 };
 
 struct Node_t {
@@ -41,6 +42,7 @@ struct Node_t {
     Node_Type_t type;
     Node_t *left     = 0;
     Node_t *right    = 0;
+    int token_n  = 0;
 };
 
 struct Tree_t {
@@ -61,7 +63,7 @@ struct Name_Cell_t {
 };
 
 struct Language_t {
-    struct Tree_t Tree = {};
+    struct Tree_t tree = {};
     struct File_t file = {};
     struct Name_Cell_t *name_cell = nullptr;
     int cell_n = 2;
@@ -72,8 +74,8 @@ Errors_t File_Reader ( struct File_t *File, FILE *input_f );
 int Get_File_Size ( FILE * f );
 
 //void Analitic ( char *buffer, struct Node_t *tree );
-void Tree_Dump_Body ( const struct Node_t *tree, FILE *tree_dump );// name_storage
-Errors_t Tree_Graph_Dump ( const struct Node_t *tree );
+void Tree_Dump_Body ( const struct Language_t *language, const struct Node_t *tree, FILE *tree_dump );
+Errors_t Tree_Graph_Dump (const struct Language_t *language );
 void Tree_Text_Dump ( const struct Node_t *tree_node );
 
 double Eval ( const struct Node_t *node );
@@ -83,7 +85,7 @@ char *File_Skip_Spaces ( char *data, int file_size );
 void Node_Free ( struct Node_t **tree );
 
 Node_t *d ( const struct Node_t *tree );
-Node_t *c ( const struct Node_t *tree );
+Node_t *Copy_Node ( const struct Node_t *tree);
 
 int Optimization_Const ( struct Node_t *tree );
 int Optimization_Option ( struct Node_t **tree );
@@ -92,7 +94,7 @@ void Optimization ( struct Node_t *tree );
 void File_Write_Front ( const struct Node_t *tree );
 void File_Write_Asm_Text ( const struct Node_t *tree, FILE *start_f );
 
-const char *Get_Op_Name ( int op_type );
+const char *Get_Op_Name ( const struct Node_t *tree_node );
 
 void Search_Tokens ( struct Language_t *language );
 int Search_Var_Name ( struct Language_t *language, char* name );
