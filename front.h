@@ -85,7 +85,7 @@ char *File_Skip_Spaces ( char *data, int file_size );
 void Node_Free ( struct Node_t **tree );
 
 Node_t *d ( const struct Node_t *tree );
-Node_t *c ( const struct Node_t *tree );
+Node_t *Copy_Node ( const struct Node_t *tree);
 
 int Optimization_Const ( struct Node_t *tree );
 int Optimization_Option ( struct Node_t **tree );

@@ -33,5 +33,6 @@ int Get_Binary_Element ( const struct Token_t token, const enum Mode_t mode );
 Node_t *Get_Comparison ( struct Position_t *position );
 
 Node_t *Get_Statement_List ( struct Position_t *position );
+Node_t *Get_Statement ( struct Position_t *position, struct Node_t *node );
 
 #endif      // RECURS_DESCENT

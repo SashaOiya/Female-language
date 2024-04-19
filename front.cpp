@@ -299,8 +299,16 @@ void Tree_Dump_Body ( const struct Language_t *language, const struct Node_t *tr
 
         return ;
     }
-    fprintf ( tree_dump, " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
-                         " label = \"%s \"];\n", tree, language->d_array.data[tree->token_n].data );
+    //fprintf ( tree_dump, " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
+    //                     " label = \"%s \"];\n", tree, language->d_array.data[tree->token_n].data );
+    if ( tree->type == NODE_TYPE_NUM ) {
+        fprintf ( tree_dump , " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
+                              " label = \"%d \"];\n",tree, tree->value );
+    }
+    else  {
+        fprintf ( tree_dump, " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
+                             " label = \"%s \"];\n", tree, Get_Op_Name ( tree ) );
+    }
 
     if ( tree->left != nullptr ) {
         fprintf ( tree_dump, "\"%p\" -> \"%p\" ", tree, tree->left );
@@ -378,8 +386,13 @@ const char *Get_Op_Name ( const struct Node_t *tree_node )  // remove naxyi
             return "}";
         }
         break;
+        case OP_CONNECT : {
+
+            return "`";
+        }
+        break;
         default : {
-            printf ( "Error\n" );
+            printf ( "Error %c\n", tree_node->value );
         }
     }
     }
@@ -465,7 +478,7 @@ Errors_t FromType_ToOption ( struct Node_t *tree_node ) // ----
     return OK_TREE;
 }
 
-Node_t *d ( const struct Node_t *tree )  // +
+/*Node_t *d ( const struct Node_t *tree )  // +
 {
     if ( tree == nullptr ) {
 
@@ -519,16 +532,18 @@ Node_t *d ( const struct Node_t *tree )  // +
         }
     }
     return nullptr;
-}
+}   */
 
-Node_t *c ( const struct Node_t *tree )  // +
+Node_t *Copy_Node ( const struct Node_t *tree)
 {
-    if ( tree == nullptr ) {
+    if (tree == nullptr) return nullptr;
+    Node_t* new_tree = (Node_t*)calloc ( 1, sizeof( Node_t ) );
+    new_tree->type  = tree->type;
+    new_tree->value = tree->value;
+    new_tree->left  = Copy_Node(tree->left);
+    new_tree->right = Copy_Node(tree->right);
 
-        return nullptr;
-    }
-
-    return Create_Node ( tree->type, tree->value, tree->left, tree->right );
+    return new_tree;
 }
 
 int Optimization_Const ( struct Node_t *tree ) // -
