@@ -36,6 +36,10 @@ void Dynamic_Array_Dtor ( struct Dynamic_Array_t *d_array )
 {
     assert ( d_array != nullptr );
 $
+    for ( int i = 0; i < d_array->capacity; ++i ) {
+        free ( d_array->data[i].data );
+    }
+
     free ( d_array->data );
     d_array->data = nullptr;
 }

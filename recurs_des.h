@@ -15,7 +15,7 @@ struct Position_t {
 enum Mode_t {    // name
     MODE_ADD_SUB = 1,
     MODE_MUL_DIV = 2,
-    MODE_MORE_LESS_EQUAL = 3
+    MODE_MORE_LESS_EQUAL_EQUIVALENCE = 3
 };
 
 int Search_Func_Name ( char* name, Name_t *name_cell);
@@ -34,5 +34,6 @@ Node_t *Get_Comparison ( struct Position_t *position );
 
 Node_t *Get_Statement_List ( struct Position_t *position );
 Node_t *Get_Statement ( struct Position_t *position, struct Node_t *node );
+Node_t *Get_Func ( struct Position_t *position );
 
 #endif      // RECURS_DESCENT
