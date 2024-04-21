@@ -145,7 +145,6 @@ Node_t *Get_Statement_List ( struct Position_t *position )
 
             new_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, state_node, new_node );
         }
-
         assert ( position->data[position->index].cell_code == '}' );
     }
 
@@ -225,10 +224,10 @@ Node_t *Get_Func ( struct Position_t *position )
 {
     assert ( position != nullptr );
 
-    Node_t *func_node = nullptr;
+    Node_t *start_func_node = nullptr;
 
     while ( position->data[position->index].type == NODE_TYPE_FUNC ) {
-        func_node = Create_Node ( NODE_TYPE_FUNC, position->data[position->index].cell_code, nullptr, nullptr );
+        Node_t *func_node = Create_Node ( NODE_TYPE_FUNC, position->data[position->index].cell_code, nullptr, nullptr );
         Node_t *start_node = func_node;
         (position->index)++;
 
@@ -244,14 +243,20 @@ Node_t *Get_Func ( struct Position_t *position )
             }
         }
         func_node = start_node;
+
         assert ( position->data[position->index].cell_code == ')' );
         (position->index)++;
 
         Node_t *state_list_node = Get_Statement_List ( position );
+        (position->index)++;
 
-        func_node->right = Create_Node ( NODE_TYPE_OP, OP_CONNECT, nullptr, state_list_node );
+        func_node->right = state_list_node;
+        start_func_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, start_func_node, func_node );
+
+        //start_func_node = func_node;
+
     }
 
-    return func_node;
+    return start_func_node;
 }
 

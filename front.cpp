@@ -63,13 +63,7 @@ void Search_Tokens ( struct Language_t *language )
         }
 $       element_name[counter] = '\0';
 
-        if ( counter > 0 && language->file.out_buffer[i]   == '(' ) {
-                            //language->file.out_buffer[i+1] == ')' ) {
-            token.type = NODE_TYPE_FUNC;
-            token.cell_code = Search_Func_Name ( language, element_name );
-$
-        }
-        else if ( counter > 0 ) {
+        if ( counter > 0 ) {
             if ( strcmp ( element_name, "if" ) == 0 ) {
                 token.type = NODE_TYPE_IF;
             }
@@ -82,6 +76,11 @@ $
             else if ( strcmp ( element_name, "return" ) == 0 ) {
                 token.type = NODE_TYPE_RETURN;
             }
+            else if ( language->file.out_buffer[i] == '(' ) {
+                            //language->file.out_buffer[i+1] == ')' ) {
+            token.type = NODE_TYPE_FUNC;
+            token.cell_code = Search_Func_Name ( language, element_name );
+$           }
             else {
 $               token.type = NODE_TYPE_VAR;
 $               token.cell_code = Search_Var_Name ( language, element_name );
@@ -362,12 +361,12 @@ const char *Get_Op_Name ( const struct Language_t *language, const struct Node_t
         break;
         case OP_MORE : {
 
-            return ">";
+            return "more";
         }
         break;
         case OP_LESS : {
 
-            return "<";
+            return "less";
         }
         break;
         case OP_EQUAL : {
