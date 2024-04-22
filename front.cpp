@@ -412,6 +412,10 @@ const char *Get_Op_Name ( const struct Language_t *language, const struct Node_t
 
         return "while";
     }
+    else if ( tree_node->type == NODE_TYPE_RETURN ) {
+
+        return "return";
+    }
     else if ( tree_node->type == NODE_TYPE_VAR ||
               tree_node->type == NODE_TYPE_FUNC ) {
         return language->name_cell[tree_node->value].data;

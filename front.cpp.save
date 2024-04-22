@@ -11,8 +11,10 @@ int main ( int argc, char *argv[] )
 
     language.tree.start = Get_General ( &language );
 
+    Tree_Text_Dump ( &language, language.tree.start );
     Tree_Graph_Dump ( &language );
-    Tree_Text_Dump ( language.tree.start );
+
+    Dynamic_Array_Dtor ( &(language.d_array) );
 
     return 0;
 }
@@ -61,13 +63,12 @@ void Search_Tokens ( struct Language_t *language )
         }
 $       element_name[counter] = '\0';
 
-        if ( counter > 0 && language->file.out_buffer[i]   == '(' &&
-                            language->file.out_buffer[i+1] == ')' ) {
+        if ( counter > 0 && language->file.out_buffer[i ]   == '(' ) {
+                            //language->file.out_buffer[i+1] == ')' ) {
             token.type = NODE_TYPE_FUNC;
             token.cell_code = Search_Func_Name ( language, element_name );
 $
         }
-        // new variable
         else if ( counter > 0 ) {
             if ( strcmp ( element_name, "if" ) == 0 ) {
                 token.type = NODE_TYPE_IF;
@@ -87,13 +88,18 @@ $               token.cell_code = Search_Var_Name ( language, element_name );
 $           }
         }
         else if ( counter == 0 ) {
+            int sign = 1;
+            if ( language->file.out_buffer[i] == '-' ) {
+                sign = -1;
+                ++i;
+            }
             for ( ; isdigit ( language->file.out_buffer[i] ); ++i, ++counter )  {    //
                 element_name[counter] = language->file.out_buffer[i];
             }
 $           element_name[counter] = '\0';
             if ( counter > 0 ) {
                 token.type = NODE_TYPE_NUM;
-$               token.cell_code = atoi ( element_name );
+$               token.cell_code = atoi ( element_name ) * sign;
             }
             else {
                 element_name[counter++] = language->file.out_buffer[i];
@@ -243,7 +249,7 @@ char *File_Skip_Spaces ( char *data, int file_size )
     return buffer;
 }
 
-void Tree_Text_Dump ( const struct Node_t *tree_node ) // +
+void Tree_Text_Dump ( const struct Language_t *language, const struct Node_t *tree_node ) // +
 {
     if ( tree_node == nullptr) {
 
@@ -251,16 +257,16 @@ void Tree_Text_Dump ( const struct Node_t *tree_node ) // +
     }
     printf ( " ( " );
 
-    Tree_Text_Dump ( tree_node->left  );
+    Tree_Text_Dump ( language, tree_node->left  );
 
     if ( tree_node->type == NODE_TYPE_NUM ) {
         printf ( "%d", tree_node->value );
     }
     else  {
-        printf ( "%s", Get_Op_Name ( tree_node->value ) );
+        printf ( "%s", Get_Op_Name ( language, tree_node ) );
     }
 
-    Tree_Text_Dump ( tree_node->right );
+    Tree_Text_Dump ( language, tree_node->right );
 
     printf ( " ) ");
 
@@ -299,8 +305,14 @@ void Tree_Dump_Body ( const struct Language_t *language, const struct Node_t *tr
 
         return ;
     }
-    fprintf ( tree_dump, " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
-                         " label = \"%s \"];\n", tree, language->d_array.data[tree->token_n].data );
+    if ( tree->type == NODE_TYPE_NUM ) {
+        fprintf ( tree_dump , " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
+                              " label = \"%d \"];\n",tree, tree->value );
+    }
+    else  {
+        fprintf ( tree_dump, " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
+                             " label = \"%s \"];\n", tree, Get_Op_Name ( language, tree ) );
+    }
 
     if ( tree->left != nullptr ) {
         fprintf ( tree_dump, "\"%p\" -> \"%p\" ", tree, tree->left );
@@ -314,9 +326,10 @@ void Tree_Dump_Body ( const struct Language_t *language, const struct Node_t *tr
     Tree_Dump_Body ( language, tree->right, tree_dump );
 }
 
-const char *Get_Op_Name ( int op_type )  // remove naxyi
+const char *Get_Op_Name ( const struct Language_t *language, const struct Node_t *tree_node )
 {
-    switch ( op_type ) {
+    if ( tree_node->type == NODE_TYPE_OP ) {
+    switch ( tree_node->value ) {
         case OP_ADD : {
 
             return "+";
@@ -362,9 +375,47 @@ const char *Get_Op_Name ( int op_type )  // remove naxyi
             return "=";
         }
         break;
-        default : {
-            printf ( "Error\n" );
+        case OP_SEMICLON : {
+
+            return ";";
         }
+        break;
+        case OP_W_BRA : {
+
+            return "{";
+        }
+        break;
+        case CL_W_BRA : {
+
+            return "}";
+        }
+        break;
+        case OP_CONNECT : {
+
+            return "`";
+        }
+        break;
+        case OP_EQUIVALENCE : {
+
+            return "~";
+        }
+        break;
+        default : {
+            printf ( "Error text dump %c\n", tree_node->value );
+        }
+    }
+    }
+    else if ( tree_node->type == NODE_TYPE_IF ) {
+
+        return "if";
+    }
+    else if ( tree_node->type == NODE_TYPE_WHILE ) {
+
+        return "while";
+    }
+    else if ( tree_node->type == NODE_TYPE_VAR ||
+              tree_node->type == NODE_TYPE_FUNC ) {
+        return language->name_cell[tree_node->value].data;
     }
 $
     return "error";
@@ -436,7 +487,7 @@ Errors_t FromType_ToOption ( struct Node_t *tree_node ) // ----
     return OK_TREE;
 }
 
-Node_t *d ( const struct Node_t *tree )  // +
+/*Node_t *d ( const struct Node_t *tree )  // +
 {
     if ( tree == nullptr ) {
 
@@ -490,16 +541,18 @@ Node_t *d ( const struct Node_t *tree )  // +
         }
     }
     return nullptr;
-}
+}   */
 
-Node_t *c ( const struct Node_t *tree )  // +
+Node_t *Copy_Node ( const struct Node_t *tree)
 {
-    if ( tree == nullptr ) {
+    if (tree == nullptr) return nullptr;
+    Node_t* new_tree = (Node_t*)calloc ( 1, sizeof( Node_t ) );
+    new_tree->type  = tree->type;
+    new_tree->value = tree->value;
+    new_tree->left  = Copy_Node(tree->left);
+    new_tree->right = Copy_Node(tree->right);
 
-        return nullptr;
-    }
-
-    return Create_Node ( tree->type, tree->value, tree->left, tree->right );
+    return new_tree;
 }
 
 int Optimization_Const ( struct Node_t *tree ) // -

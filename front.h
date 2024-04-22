@@ -61,6 +61,7 @@ struct Name_Cell_t {
     int type = 0;
     int name_code = 0;
     char *data = nullptr; // char*
+    int value = 0;
 };
 
 struct Language_t {
