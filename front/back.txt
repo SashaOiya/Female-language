@@ -1,0 +1,23 @@
+
+: 0;	\\main
+push 4;
+pop rbx;
+push rbx;
+push 3;
+je 2;
+call 3;
+
+: 2;
+push rbx;
+push 1;
+add;
+pop rbx;
+jmp 4;
+ret;
+
+
+: 3;	
+jmp 25;
+ret;
+
+ret;

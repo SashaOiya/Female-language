@@ -1,16 +1,7 @@
-main ()
-{
-	lox = 3;
-	x = 5;
-	y = 6;
-	if ( lox > 3 ) {
-		while ( lox < 5 ) {
-			lox = lox + 1;
-		}
-	}
-	else {
-		los = 3!
+main ( ) {
+	x = 4;
+	while ( x ~ 3 ) {
+		x = x + 1;
 	}
 	return ;
 }
-	  

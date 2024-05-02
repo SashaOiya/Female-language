@@ -1,5 +1,6 @@
 #include "recurs_des.h"
 #include "front.h"
+//#include "back.h"
 // Dtor[[[[[[[[[[[[[[[[
 static const int DUMP_COUNTER = 100;
 
@@ -7,20 +8,27 @@ int main ( int argc, char *argv[] )
 {
     struct Language_t language = {};
 
-    Language_Ctor ( &language, ( argc > 0 ) ? argv[1] : nullptr );
+    Language_Ctor ( &language, ( argc > 0 ) ? argv[1] : nullptr, argv[2] );
 
-    //Tree.start = Get_General ( File.out_buffer, Tree.start );
+    language.if_while_code_counter = Search_Free_Cell ( &language );
 
-    //Tree_Graph_Dump ( Tree.start );
-    //Tree_Text_Dump ( Tree.start );
+    language.tree.start = Get_General ( &language );
+
+    Tree_Text_Dump ( &language, language.tree.start );
+    Tree_Graph_Dump ( &language );
+
+    Back_End ( &language, language.tree.start );   // hlt
+
+    Dynamic_Array_Dtor ( &(language.d_array) );
 
     return 0;
 }
 
-Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name )
+Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name, char *output_file_name )
 {
     assert ( language != nullptr );
     assert ( input_file_name != nullptr );
+    assert ( output_file_name != nullptr );
 
     FILE *input_f = fopen ( input_file_name, "r" );
     if ( !input_f ) {
@@ -44,6 +52,12 @@ Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name )
 
     fclose ( input_f );
 
+    language->out_file = fopen ( output_file_name, "w" );
+    if ( !language->out_file ) {
+
+        return ERR_FOPEN;
+    }
+
     return NO_ERR;
 }
 
@@ -61,14 +75,7 @@ void Search_Tokens ( struct Language_t *language )
         }
 $       element_name[counter] = '\0';
 
-        if ( counter > 0 && language->file.out_buffer[i]   == '(' &&
-                            language->file.out_buffer[i+1] == ')' ) {
-            token.type = NODE_TYPE_FUNC;
-            token.cell_code = Search_Func_Name ( language, element_name );
-$
-        }
-        // new variable
-        else if ( counter > 0 ) {
+        if ( counter > 0 ) {
             if ( strcmp ( element_name, "if" ) == 0 ) {
                 token.type = NODE_TYPE_IF;
             }
@@ -81,27 +88,39 @@ $
             else if ( strcmp ( element_name, "return" ) == 0 ) {
                 token.type = NODE_TYPE_RETURN;
             }
+            else if ( language->file.out_buffer[i] == '(' ) {
+                            //language->file.out_buffer[i+1] == ')' ) {
+            token.type = NODE_TYPE_FUNC;
+            token.cell_code = Search_Func_Name ( language, element_name );
+$           }
             else {
 $               token.type = NODE_TYPE_VAR;
 $               token.cell_code = Search_Var_Name ( language, element_name );
 $           }
         }
         else if ( counter == 0 ) {
+            int sign = 1;
+            if ( language->file.out_buffer[i] == '-' ) {
+                sign = -1;
+                ++i;
+            }
             for ( ; isdigit ( language->file.out_buffer[i] ); ++i, ++counter )  {    //
                 element_name[counter] = language->file.out_buffer[i];
             }
 $           element_name[counter] = '\0';
             if ( counter > 0 ) {
                 token.type = NODE_TYPE_NUM;
-$               token.cell_code = atoi ( element_name );
+$               token.cell_code = atoi ( element_name ) * sign;
             }
             else {
+                element_name[counter++] = language->file.out_buffer[i];
+                element_name[counter] = '\0';
                 token.type = NODE_TYPE_OP;
 $               token.cell_code = language->file.out_buffer[i];
                 ++i;
             }
         }
-$
+$       token.data = strdup ( element_name );  // option
         Dynamic_Array_Push ( &(language->d_array), token );
     }
     Dynamic_Array_Dump ( &(language->d_array), INFORMATION );
@@ -241,7 +260,7 @@ char *File_Skip_Spaces ( char *data, int file_size )
     return buffer;
 }
 
-void Tree_Text_Dump ( const struct Node_t *tree_node ) // +
+void Tree_Text_Dump ( const struct Language_t *language, const struct Node_t *tree_node ) // +
 {
     if ( tree_node == nullptr) {
 
@@ -249,23 +268,22 @@ void Tree_Text_Dump ( const struct Node_t *tree_node ) // +
     }
     printf ( " ( " );
 
-    Tree_Text_Dump ( tree_node->left  );
+    Tree_Text_Dump ( language, tree_node->left  );
 
     if ( tree_node->type == NODE_TYPE_NUM ) {
         printf ( "%d", tree_node->value );
     }
-    else if ( tree_node->type == NODE_TYPE_OP ||
-              tree_node->type == NODE_TYPE_VAR ) {
-        printf ( "%s", Get_Op_Name ( tree_node->value ) );
+    else  {
+        printf ( "%s", Get_Op_Name ( language, tree_node ) );
     }
 
-    Tree_Text_Dump ( tree_node->right );
+    Tree_Text_Dump ( language, tree_node->right );
 
     printf ( " ) ");
 
 }
 
-Errors_t Tree_Graph_Dump ( const struct Node_t *tree ) // +
+Errors_t Tree_Graph_Dump ( const struct Language_t *language ) // +
 {
     FILE *tree_dump = fopen ( "tree.dot", "w" );
     if ( !tree_dump ) {
@@ -276,9 +294,9 @@ Errors_t Tree_Graph_Dump ( const struct Node_t *tree ) // +
 
     fprintf ( tree_dump, "digraph G { \n"
                          "node [shape = record];\n"
-                         " \"%p\" ", tree );
+                         " \"%p\" ", language->tree.start );
 
-    Tree_Dump_Body ( tree, tree_dump );
+    Tree_Dump_Body ( language, language->tree.start, tree_dump );
 
     fprintf ( tree_dump, "}\n" );
     fclose ( tree_dump );
@@ -292,21 +310,19 @@ Errors_t Tree_Graph_Dump ( const struct Node_t *tree ) // +
     return OK_TREE;
 }
 
-void Tree_Dump_Body ( const struct Node_t *tree, FILE *tree_dump ) // -
+void Tree_Dump_Body ( const struct Language_t *language, const struct Node_t *tree, FILE *tree_dump ) // +
 {
     if ( tree == nullptr) {
 
         return ;
     }
-    // No copy pasta: %s + function print node data(type) return char*?
     if ( tree->type == NODE_TYPE_NUM ) {
         fprintf ( tree_dump , " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
                               " label = \"%d \"];\n",tree, tree->value );
     }
-    else if ( tree->type == NODE_TYPE_VAR ||  // separate var
-              tree->type == NODE_TYPE_OP ) {
+    else  {
         fprintf ( tree_dump, " \"%p\" [shape = Mrecord, style = filled, fillcolor = lightpink "
-                             " label = \"%s \"];\n", tree, Get_Op_Name ( tree->value ) );
+                             " label = \"%s \"];\n", tree, Get_Op_Name ( language, tree ) );
     }
 
     if ( tree->left != nullptr ) {
@@ -317,33 +333,14 @@ void Tree_Dump_Body ( const struct Node_t *tree, FILE *tree_dump ) // -
         fprintf ( tree_dump, "\n \"%p\" -> \"%p\" \n", tree, tree->right );
     }
 
-    Tree_Dump_Body ( tree->left,  tree_dump );
-    Tree_Dump_Body ( tree->right, tree_dump );
+    Tree_Dump_Body ( language, tree->left,  tree_dump );
+    Tree_Dump_Body ( language, tree->right, tree_dump );
 }
 
-const char *Get_Op_Name ( int op_type )
+const char *Get_Op_Name ( const struct Language_t *language, const struct Node_t *tree_node )
 {
-    switch ( op_type ) {
-        case OP_SIN : {
-
-            return "sin";
-        }
-        break;
-        case OP_COS : {
-
-            return "cos";
-        }
-        break;
-        case OP_TG  : {
-
-            return "tg";
-        }
-        break;
-        case OP_CTG : {
-
-            return "ctg";
-        }
-        break;
+    if ( tree_node->type == NODE_TYPE_OP ) {
+    switch ( tree_node->value ) {
         case OP_ADD : {
 
             return "+";
@@ -376,12 +373,12 @@ const char *Get_Op_Name ( int op_type )
         break;
         case OP_MORE : {
 
-            return ">";
+            return "more";
         }
         break;
         case OP_LESS : {
 
-            return "<";
+            return "less";
         }
         break;
         case OP_EQUAL : {
@@ -389,9 +386,55 @@ const char *Get_Op_Name ( int op_type )
             return "=";
         }
         break;
-        default : {
-            printf ( "Error\n" );
+        case OP_SEMICLON : {
+
+            return ";";
         }
+        break;
+        case OP_W_BRA : {
+
+            return "{";
+        }
+        break;
+        case CL_W_BRA : {
+
+            return "}";
+        }
+        break;
+        case OP_CONNECT : {
+
+            return "`";
+        }
+        break;
+        case OP_EQUIVALENCE : {
+
+            return "~";
+        }
+        break;
+        default : {
+            printf ( "Error text dump %c\n", tree_node->value );
+        }
+    }
+    }
+    else if ( tree_node->type == NODE_TYPE_IF ) {
+
+        return "if";
+    }
+    else if ( tree_node->type == NODE_TYPE_WHILE ) {
+
+        return "while";
+    }
+    else if ( tree_node->type == NODE_TYPE_ELSE ) {
+
+        return "else";
+    }
+    else if ( tree_node->type == NODE_TYPE_RETURN ) {
+
+        return "return";
+    }
+    else if ( tree_node->type == NODE_TYPE_VAR ||
+              tree_node->type == NODE_TYPE_FUNC ) {
+        return language->name_cell[tree_node->value].data;
     }
 $
     return "error";
@@ -463,7 +506,7 @@ Errors_t FromType_ToOption ( struct Node_t *tree_node ) // ----
     return OK_TREE;
 }
 
-Node_t *d ( const struct Node_t *tree )  // +
+/*Node_t *d ( const struct Node_t *tree )  // +
 {
     if ( tree == nullptr ) {
 
@@ -517,19 +560,21 @@ Node_t *d ( const struct Node_t *tree )  // +
         }
     }
     return nullptr;
-}
+}   */
 
-Node_t *c ( const struct Node_t *tree )  // +
+Node_t *Copy_Node ( const struct Node_t *tree)
 {
-    if ( tree == nullptr ) {
+    if (tree == nullptr) return nullptr;
+    Node_t* new_tree = (Node_t*)calloc ( 1, sizeof( Node_t ) );
+    new_tree->type  = tree->type;
+    new_tree->value = tree->value;
+    new_tree->left  = Copy_Node(tree->left);
+    new_tree->right = Copy_Node(tree->right);
 
-        return nullptr;
-    }
-
-    return Create_Node ( tree->type, tree->value, tree->left, tree->right );
+    return new_tree;
 }
 
-int Optimization_Const ( struct Node_t *tree ) // +
+int Optimization_Const ( struct Node_t *tree ) // -
 {
 $   if ( tree == nullptr || tree->right == nullptr || tree->left == nullptr ) {
 
@@ -551,7 +596,7 @@ $       return ( Optimization_Const ( tree->left ) ||
     }
 }
 
-int Optimization_Option ( struct Node_t **tree )  // +
+int Optimization_Option ( struct Node_t **tree )  // -
 {
 $   if ( (*tree) == nullptr  ) {
 
@@ -587,7 +632,7 @@ $       return ( Optimization_Option ( &(*tree)->left ) ||
     }
 }
 
-void Optimization ( struct Node_t *tree )  // +
+void Optimization ( struct Node_t *tree )  // -
 {
     int occurrences_n = 0;
     int prev_occuttences_n = 0;
@@ -615,30 +660,149 @@ void Node_Free ( struct Node_t **tree ) // +
     }
 }
 
-/*void File_Write_Front ( const struct Node_t *tree )
+void Back_End ( struct Language_t *language, const struct Node_t *tree_node )
 {
-    FILE *asm_f = fopen ( "asm.txt", "w" );
+    assert ( language != nullptr );
 
-    File_Write_Asm_Text ( tree, asm_f );
+    if ( tree_node == nullptr ) {
+$
+        return ;
+    }
 
-    fprintf ( asm_f, "hlt;" );
-}
-
-void File_Write_Asm_Text ( const struct Node_t *tree, FILE *start_f )
-{
-    if ( tree == nullptr ) {
+    if ( tree_node->type == NODE_TYPE_FUNC && ( tree_node->right != nullptr )  ) {
+$       fprintf ( language->out_file, "\n: %d;\t\\\\%s\n", language->name_cell[tree_node->value].name_code, language->name_cell[tree_node->value].data );
+    }
+    else if ( tree_node->type == NODE_TYPE_FUNC && ( tree_node->right == nullptr )  ) {
+        Back_End ( language, tree_node->left  );
+$       fprintf ( language->out_file, "call %d;\n", language->name_cell[tree_node->value].name_code );
+        language->id += 2;
 
         return ;
     }
-    File_Write_Asm_Text ( tree->left, start_f );
-    File_Write_Asm_Text ( tree->right, start_f );
+    else if ( tree_node->type == NODE_TYPE_OP && tree_node->value == OP_EQUAL ) {
+        Back_End ( language, tree_node->right );
+$       fprintf ( language->out_file, "pop r%cx;\n", language->name_cell[tree_node->left->value].name_code + 'a' );
+        language->id += 2;
 
-    if ( tree->type == NUM ) {
-        fprintf ( start_f, "push %d;\n", tree->value );
+        return ;
     }
-    if ( tree->type == OP && tree->value == OP_MUL ) {
-        fprintf ( start_f, "mul;\n" );
+    else if ( tree_node->type == NODE_TYPE_VAR ) {
+        //Back_End ( language, tree_node->left  );
+$       fprintf ( language->out_file, "push r%cx;\n", language->name_cell[tree_node->value].name_code + 'a' );
+        language->id += 2;
+        //return;
     }
-} */
+    else if ( tree_node->type == NODE_TYPE_NUM ) {
+$       fprintf ( language->out_file, "push %d;\n", tree_node->value );
+        language->id += 2;
+    }
+    else if ( tree_node->type == NODE_TYPE_OP && ( tree_node->value == OP_EQUIVALENCE ) ) {   // > < >= <=
+        Back_End ( language, tree_node->left  );
+        Back_End ( language, tree_node->right );
+        language->id += 2;
+$       fprintf ( language->out_file, "%s %d;\n", Get_Op_Asm_Code ( tree_node->value ), language->if_while_code_counter );
+
+        return ;
+    }
+    else if ( tree_node->type == NODE_TYPE_OP && tree_node->value != OP_CONNECT && tree_node->value != OP_SEMICLON ) {   // ;
+        Back_End ( language, tree_node->left  );
+        Back_End ( language, tree_node->right );
+        language->id += 1;
+$       fprintf ( language->out_file, "%s;\n", Get_Op_Asm_Code ( tree_node->value ) );
+
+        return ;
+    }
+    else if ( tree_node->type == NODE_TYPE_RETURN ) {
+        language->id += 1;
+$       fprintf ( language->out_file, "ret;\n" );
+    }
+    else if ( tree_node->type == NODE_TYPE_IF ) { // else
+        Back_End ( language, tree_node->left  );
+        fprintf ( language->out_file, "call %d;\n", language->if_while_code_counter + 1 );
+        language->id += 2;
+        fprintf ( language->out_file, "\n: %d;\n", language->if_while_code_counter );
+
+        Back_End ( language, tree_node->right );
+        fprintf ( language->out_file, "ret;\n\n" ); // +1
+        fprintf ( language->out_file, "\n: %d;\t\n", language->if_while_code_counter + 1 );  ////
+        fprintf ( language->out_file, "jmp %d;\n", language->id + 4 ); // +3
+        fprintf ( language->out_file, "ret;\n\n" );     // +4
+
+        language->id += 4;
+        language->if_while_code_counter += 2;
+
+        return ;
+    }
+    else if ( tree_node->type == NODE_TYPE_WHILE ) { // else
+        int prev_id = language->id;
+        Back_End ( language, tree_node->left );
+        fprintf ( language->out_file, "call %d;\n", language->if_while_code_counter + 1 );
+        language->id += 2;
+        fprintf ( language->out_file, "\n: %d;\n", language->if_while_code_counter );
+
+        Back_End ( language, tree_node->right );
+        fprintf ( language->out_file, "jmp %d;\n", prev_id );  // +2
+        fprintf ( language->out_file, "ret;\n\n" ); // +3
+        fprintf ( language->out_file, "\n: %d;\t\n", language->if_while_code_counter + 1 );  ////
+        fprintf ( language->out_file, "jmp %d;\n", language->id + 6 ); // +4
+        fprintf ( language->out_file, "ret;\n\n" );     // +5
+
+        language->id += 4;
+        language->if_while_code_counter += 2;
+
+        return ;
+    }
+
+    Back_End ( language, tree_node->left  );
+    Back_End ( language, tree_node->right );
+
+}
+
+const char *Get_Op_Asm_Code ( int value )
+{
+    switch ( value ) {
+        case OP_ADD : {
+
+            return "add";
+        }
+        break;
+        case OP_SUB : {
+
+            return "sub";
+        }
+        break;
+        case OP_DIV : {
+
+            return "div";
+        }
+        break;
+        case OP_MUL : {
+
+            return "mul";
+        }
+        break;
+        case OP_EQUIVALENCE : {
+
+            return "je"; // %d", language->if_while_code_counter; //
+        }
+        break;
+        case OP_MORE : {
+
+            return "jb";
+        }
+        break;
+        case OP_LESS : {
+
+            return "ja";
+        }
+        break;
+        default : {
+            printf ( "ASM CODE ERROR \n" );
+        }
+        break;
+    }
+
+    return "ASM CODE ERROR";
+}
 
 
