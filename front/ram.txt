@@ -1,0 +1,10 @@
+: 0;
+in;
+push [3];
+pop [3];
+push 3;
+pop rax;
+push [3+rax]; // in to [6]
+pop [3+rax];
+hlt;
+

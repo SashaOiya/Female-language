@@ -1,0 +1,50 @@
+main ()
+{
+	bla = 3;
+	if ( bla > 2 ) {
+		while ( x < 3 ) {
+			;
+		}
+	}
+	else { 
+		lox = 3;
+	}
+	return ;
+}
+
+while -> нас ждут чудеса в облаках
+return -> мы ведь феи из Винкс
+if ->  всегда устремлены к победе
+= -> чудесь творить вольны
+else -> только вместе мы сильны
+main -> алфея
+print ->
+
+Var_Def := ident '=' Get_Comparison ';'
+Func_Def := [ ident '(' ')' Statement_List ]* 
+Statement_List := '{' [statement]* '}'
+statement := Var_Def | If | While | Get_Func ( ident '(' ')' ';' ) | ';' // comparison
+While := 'while' '(' Get_Comparison ')' Statement_List
+If := 'if' '(' Get_Comparison ')' Statement_List
+Get_Comparison := Get_Exp  [ [ '>', '<', '==' ] Get_exp ]*
+Get_Exp := Get_Term [ [ '*', '/' ] Get_Term*
+Get_Term := Get_Partititon [ [ '+', '-' ] Get_Partition ]*
+Get_Partition := '(' Get_Exp ')' | Get_Neg_Number | ident [ Var,Func '(' ')' ]
+
+алфея ()
+{
+	пикси = 3;
+	Cкай = 0;
+	всегда устремлены к победе ( пикси > 3 ) {
+		нас ждут чудеса в облаках ( пикси < 3 ) {
+			;
+		}
+	}
+	только вместе мы сильны {
+		Скай = 3!
+	}
+	мы ведь феи из Винкс;
+}
+
+все значения возвращать через первую введённую переменную
+все переменные по дефолту 0
