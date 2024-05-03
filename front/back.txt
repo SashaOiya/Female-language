@@ -1,42 +1,23 @@
+call 0;
+hlt;
 
 : 0;	\\main
 push 2;
 pop rbx;
 push rbx;
 push 1;
-je 3;
-call 4;
+je 2;
+call 3;
 
-: 3;
+: 2;
 push 2;
 pop rbx;
 ret;
 
 
-: 4;	
-jmp 20;
+: 3;	
+jmp 23;
 ret;
 
 push rbx;
-push 2;
-je 5;
-call 6;
-
-: 5;
-push 3;
-pop rbx;
-ret;
-
-
-: 6;	
-jmp 36;
-ret;
-
-push rbx;
-ret;
-
-: 2;	\\lox
-push rbx;
-push 4;
-mul;
 ret;

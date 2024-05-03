@@ -8,12 +8,9 @@
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
-#include "log.h"
 #include "dynamic_array.h"
+//#include "log.h"
 
-//#include "back.h"
-
-//int CELL_SIZE = 10;
 const int cell_mul_coeff = 2;
 const int energency_val  = -1;
 const int max_name_size  = 35;
@@ -75,21 +72,19 @@ struct Language_t {
     struct Name_Cell_t *name_cell = nullptr;
     int cell_n = 2;
     int operator_counter = 0;
-    FILE *out_file = nullptr;
+    FILE *out_file = nullptr;  // hyita
     int id = 0;
 };
 
 Errors_t File_Reader ( struct File_t *File, FILE *input_f );
 int Get_File_Size ( FILE * f );
 
-//void Analitic ( char *buffer, struct Node_t *tree );
 void Tree_Dump_Body ( const struct Language_t *language, const struct Node_t *tree, FILE *tree_dump );
 Errors_t Tree_Graph_Dump (const struct Language_t *language );
 void Tree_Text_Dump ( const struct Language_t *language, const struct Node_t *tree_node );
 
 double Eval ( const struct Node_t *node );
 Node_t *Create_Node ( Node_Type_t option, int value, struct Node_t *left, struct Node_t *right );
-Errors_t FromType_ToOption ( struct Node_t *tree_node );
 char *File_Skip_Spaces ( char *data, int file_size );
 void Node_Free ( struct Node_t **tree );
 
@@ -110,8 +105,6 @@ int Search_Free_Cell ( struct Language_t *language );
 int Search_Func_Var_Name ( struct Language_t *language, char* name, const Node_Type_t type );
 
 Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name, char *output_file_name );
-
-void Back_End ( struct Language_t *language, const struct Node_t *tree_node );
-const char *Get_Op_Asm_Code ( int value );
+void Language_Dtor ( struct Language_t *language );
 
 #endif  // FRONT_END

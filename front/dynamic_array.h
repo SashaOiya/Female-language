@@ -1,11 +1,11 @@
 #ifndef DYNAMIC_ARRAY
 #define DYNAMIC_ARRAY
 
-//#include "front.h"
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+//#include "front.h"
 
 #define INFORMATION __PRETTY_FUNCTION__, __FILE__
 

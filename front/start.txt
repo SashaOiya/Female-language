@@ -3,13 +3,6 @@ main ( ) {
 	if ( x ~ 1 ) {
 		x = 2;
 	}
-	else ( x ~ 2 ) {
-		x = 3;
-	}
 	return (x);
-}
-
-lox ( ) {
-	return ( x* 4);
 }
 
