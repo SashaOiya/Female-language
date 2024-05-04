@@ -1,22 +1,11 @@
-main (a, b, c) {
-	x = 7;
-	y = 8 * 9;
-	if ( x ~ 3 ) {
+main ( ) {
+	x = 3;
+	if ( x < 4 ) {
+		x = 1 + x ;
 		if ( x ~ 4 ) {
-			;
+			x = 153;
 		}
 	}
-	return ;
+	return (x);
 }
 
-lox () {
-	x = 7^2^3;
-	lox ( a, b );
-	return ;
-}
-
-puck () {
-	y = 6;
-	x = ( 8 * 7 ) * 6;
-	return ;
-}

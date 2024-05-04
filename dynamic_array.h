@@ -1,11 +1,11 @@
 #ifndef DYNAMIC_ARRAY
 #define DYNAMIC_ARRAY
 
-//#include "front.h"
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+//#include "front.h"
 
 #define INFORMATION __PRETTY_FUNCTION__, __FILE__
 
@@ -38,9 +38,10 @@ enum Errors_t {
     ERR_CALLO = 5,
     ERR_CYCLE = 6,
     ERR_CTYPE = 7,
-    OK_FILE   = 8,
-    OK_OCCURR = 9,
-    NO_ERR    = 10,
+    ERR_CELLR = 8,
+    OK_FILE   = 9,
+    OK_OCCURR = 10,
+    NO_ERR    = 11
 };
 
 struct Token_t {

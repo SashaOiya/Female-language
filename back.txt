@@ -1,0 +1,38 @@
+
+: 0;	\\main
+push 3;
+pop rbx;
+push rbx;
+push 4;
+ja 2;
+call 3;
+
+: 2;
+push 1;
+push rbx;
+add;
+pop rbx;
+push rbx;
+push 4;
+je 4;
+call 5;
+
+: 4;
+push 153;
+pop rbx;
+ret;
+
+
+: 5;	
+jmp 35;
+ret;
+
+ret;
+
+
+: 3;	
+jmp 39;
+ret;
+
+push rbx;
+hlt;

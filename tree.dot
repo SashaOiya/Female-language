@@ -1,108 +1,56 @@
 digraph G { 
 node [shape = record];
- "00B032E8"  "00B032E8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B032E8" -> "00B01898" 
- "00B032E8" -> "00B033D8" 
- "00B01898" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "main "];
-"00B01898" -> "00B018B0" 
- "00B01898" -> "00B08668" 
- "00B018B0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "a "];
-"00B018B0" -> "00B01910"  "00B01910" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "b "];
-"00B01910" -> "00B01928"  "00B01928" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "c "];
- "00B08668" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B08668" -> "00B01970" 
- "00B08668" -> "00B08758" 
- "00B01970" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
-"00B01970" -> "00B01940" 
- "00B01970" -> "00B01958" 
- "00B01940" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
- "00B01958" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "7 "];
- "00B08758" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B08758" -> "00B004C8" 
- "00B08758" -> "00B08770" 
- "00B004C8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
-"00B004C8" -> "00B01988" 
- "00B004C8" -> "00B004B0" 
- "00B01988" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "y "];
- "00B004B0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "* "];
-"00B004B0" -> "00B019A0" 
- "00B004B0" -> "00B019B8" 
- "00B019A0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "8 "];
- "00B019B8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "9 "];
- "00B08770" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B08770" -> "00B08620"  "00B08620" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "if "];
-"00B08620" -> "00B00510" 
- "00B08620" -> "00B08638" 
- "00B00510" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "~ "];
-"00B00510" -> "00B004E0" 
- "00B00510" -> "00B004F8" 
- "00B004E0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
- "00B004F8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "3 "];
- "00B08638" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B08638" -> "00B087B8"  "00B087B8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "if "];
-"00B087B8" -> "00B08608" 
- "00B087B8" -> "00B08728" 
- "00B08608" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "~ "];
-"00B08608" -> "00B08710" 
- "00B08608" -> "00B086F8" 
- "00B08710" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
- "00B086F8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "4 "];
- "00B08728" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B08728" -> "00B086E0"  "00B086E0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "; "];
- "00B033D8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B033D8" -> "00B087D0" 
- "00B033D8" -> "00B033C0" 
- "00B087D0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "lox "];
+ "006D8620"  "006D8620" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"006D8620" -> "006D1628"  "006D1628" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "main "];
 
- "00B087D0" -> "00B03498" 
- "00B03498" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B03498" -> "00B087A0" 
- "00B03498" -> "00B03300" 
- "00B087A0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
-"00B087A0" -> "00B08680" 
- "00B087A0" -> "00B08788" 
- "00B08680" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
- "00B08788" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "^ "];
-"00B08788" -> "00B08740" 
- "00B08788" -> "00B086C8" 
- "00B08740" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "^ "];
-"00B08740" -> "00B086B0" 
- "00B08740" -> "00B08698" 
- "00B086B0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "7 "];
- "00B08698" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "2 "];
- "00B086C8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "3 "];
- "00B03300" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B03300" -> "00B08650"  "00B08650" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "lox "];
-"00B08650" -> "00B03318"  "00B03318" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "a "];
-"00B03318" -> "00B03450"  "00B03450" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "b "];
- "00B033C0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B033C0" -> "00B03420"  "00B03420" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "puck "];
-
- "00B03420" -> "00B033A8" 
- "00B033A8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B033A8" -> "00B03348" 
- "00B033A8" -> "00B034E0" 
- "00B03348" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
-"00B03348" -> "00B03330" 
- "00B03348" -> "00B034B0" 
- "00B03330" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "y "];
- "00B034B0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "6 "];
- "00B034E0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B034E0" -> "00B03390" 
- "00B034E0" -> "00B03480" 
- "00B03390" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
-"00B03390" -> "00B03360" 
- "00B03390" -> "00B03378" 
- "00B03360" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
- "00B03378" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "* "];
-"00B03378" -> "00B032D0" 
- "00B03378" -> "00B03528" 
- "00B032D0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "* "];
-"00B032D0" -> "00B03438" 
- "00B032D0" -> "00B034C8" 
- "00B03438" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "8 "];
- "00B034C8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "7 "];
- "00B03528" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "6 "];
- "00B03480" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00B03480" -> "00B03468"  "00B03468" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "return "];
+ "006D1628" -> "006D86F8" 
+ "006D86F8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"006D86F8" -> "006D1858" 
+ "006D86F8" -> "006D8608" 
+ "006D1858" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
+"006D1858" -> "006D1718" 
+ "006D1858" -> "006D1730" 
+ "006D1718" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "006D1730" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "3 "];
+ "006D8608" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"006D8608" -> "006D8740" 
+ "006D8608" -> "006D86E0" 
+ "006D8740" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "if "];
+"006D8740" -> "006D18A0" 
+ "006D8740" -> "006D86B0" 
+ "006D18A0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "less "];
+"006D18A0" -> "006D1870" 
+ "006D18A0" -> "006D1888" 
+ "006D1870" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "006D1888" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "4 "];
+ "006D86B0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"006D86B0" -> "006D04C0" 
+ "006D86B0" -> "006D87D0" 
+ "006D04C0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
+"006D04C0" -> "006D18B8" 
+ "006D04C0" -> "006D1900" 
+ "006D18B8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "006D1900" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "+ "];
+"006D1900" -> "006D18D0" 
+ "006D1900" -> "006D18E8" 
+ "006D18D0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "1 "];
+ "006D18E8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "006D87D0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"006D87D0" -> "006D87A0"  "006D87A0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "if "];
+"006D87A0" -> "006D0508" 
+ "006D87A0" -> "006D8770" 
+ "006D0508" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "~ "];
+"006D0508" -> "006D04D8" 
+ "006D0508" -> "006D04F0" 
+ "006D04D8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "006D04F0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "4 "];
+ "006D8770" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"006D8770" -> "006D87B8"  "006D87B8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
+"006D87B8" -> "006D8668" 
+ "006D87B8" -> "006D8728" 
+ "006D8668" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "006D8728" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "153 "];
+ "006D86E0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"006D86E0" -> "006D8788"  "006D8788" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "return "];
+"006D8788" -> "006D8758"  "006D8758" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
 }
