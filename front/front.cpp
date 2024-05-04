@@ -9,25 +9,25 @@ int main ( int argc, char *argv[] )
 {
     struct Language_t language = {};
                                                // errors
-    Language_Ctor ( &language, ( argc > 0 ) ? argv[1] : nullptr, argv[2] );
+    Language_Ctor ( &language, ( argc > 0 ) ? argv[1] : nullptr );
 
     language.tree.start = Get_General ( &language );
 
     Tree_Text_Dump ( &language, language.tree.start );
     Tree_Graph_Dump ( &language );
 
-    Back_End ( &language );   // hlt
+    Back_End ( &language, argv[2] );   // hlt
 
     Language_Dtor ( &language );
 
     return 0;
 }
 
-Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name, char *output_file_name ) // wtf baaad   + dtor
+Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name ) // wtf baaad   + dtor
 {
     assert ( language != nullptr );
     assert ( input_file_name != nullptr );
-    assert ( output_file_name != nullptr );
+    //assert ( output_file_name != nullptr );
 
     FILE *input_f = fopen ( input_file_name, "r" );
     if ( !input_f ) {
@@ -60,12 +60,6 @@ Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name, cha
 
     free ( language->file.out_buffer );
     fclose ( input_f );
-
-    language->out_file = fopen ( output_file_name, "w" );
-    if ( !language->out_file ) {
-
-        return ERR_FOPEN;
-    }
 
     language->operator_counter = Search_Free_Cell ( language );
 

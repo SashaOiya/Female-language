@@ -214,10 +214,10 @@ $
         return ;
     }
     else if ( tree_node->type == NODE_TYPE_IF || tree_node->type == NODE_TYPE_ELSE ) { // else
-
+        
         Back_End_Count_Id ( language, tree_node->left, add_id  );
-        *add_id += 3;
         Back_End_Count_Id ( language, tree_node->right, add_id );
+    
 
         return ;
     }

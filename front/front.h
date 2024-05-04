@@ -49,6 +49,7 @@ struct Node_t {
 
 struct Tree_t {
     Node_t *start = nullptr;
+    int current_func = 0;
     //struct Name_t *name_storage = nullptr;
     //Array
 };
@@ -104,7 +105,7 @@ Errors_t Search_Tokens ( struct Language_t *language );
 int Search_Free_Cell ( struct Language_t *language );
 int Search_Func_Var_Name ( struct Language_t *language, char* name, const Node_Type_t type );
 
-Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name, char *output_file_name );
+Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name );
 void Language_Dtor ( struct Language_t *language );
 
 #endif  // FRONT_END

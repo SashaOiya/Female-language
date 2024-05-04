@@ -1,6 +1,7 @@
 #include "recurs_des.h"
 #include "front.h"
-//#include "back.h"
+#include "back.h"
+#include "log.h"
 // Dtor[[[[[[[[[[[[[[[[
 static const int DUMP_COUNTER = 100;
 
@@ -18,11 +19,12 @@ int main ( int argc, char *argv[] )
     Back_End ( &language, language.tree.start );   // hlt
 
     Dynamic_Array_Dtor ( &(language.d_array) );
+    Language_Dtor ( struct Language_t *language )
 
     return 0;
 }
 
-Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name, char *output_file_name ) // wtf baaad
+Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name, char *output_file_name ) // wtf baaad   + dtor
 {
     assert ( language != nullptr );
     assert ( input_file_name != nullptr );
@@ -57,6 +59,7 @@ Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name, cha
     Search_Tokens ( language );
     // errors
 
+    free ( language->file.out_buffer );
     fclose ( input_f );
 
     language->out_file = fopen ( output_file_name, "w" );
@@ -68,6 +71,69 @@ Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name, cha
     language->operator_counter = Search_Free_Cell ( language );
 
     return NO_ERR;
+}
+
+Errors_t File_Reader ( struct File_t *file, FILE *input_f )  // +
+{
+    assert ( file != nullptr );
+    assert ( input_f != nullptr );
+
+    file->file_size = Get_File_Size ( input_f );
+
+    file->out_buffer = ( char *)calloc ( file->file_size + 1, sizeof ( char ) );
+    if ( !file->out_buffer ) {
+
+        return ERR_CALLO;
+    }
+
+    int ret_code = fread ( file->out_buffer, sizeof( file->out_buffer[0] ), file->file_size, input_f );
+    if ( ret_code != file->file_size  ) {
+        if ( feof ( input_f ) ) {
+            printf ( "Error reading test.bin: unexpected end of file\n" );
+        }
+        else if ( ferror ( input_f ) ) {
+            perror ( "Error reading test.bin" );
+        }
+        return ERR_FREAD;
+    }
+
+    return OK_FILE;
+}
+
+int Get_File_Size ( FILE * f ) // +
+{
+    int prev = ftell ( f );
+
+    fseek ( f, 0, SEEK_END );
+    size_t size_not_blue = ftell ( f );
+    fseek ( f, prev, SEEK_SET );
+
+    return size_not_blue;
+}
+
+char *File_Skip_Spaces ( char *data, int file_size )   // +
+{
+    assert ( data != nullptr );
+    assert ( file_size != 0  );
+
+    char *buffer = (char *)calloc ( ( file_size + 1 ) * sizeof ( data[0] ), 1 );
+    if ( buffer == nullptr ) {
+
+        return buffer;
+    }
+
+    int position = 0;
+
+    for ( ; *data != '\0'; ++data ) {
+        while ( isspace ( *data ) ) {
+            ++data;
+        }
+        buffer[position++] = *data;
+    }
+    buffer[position] = '\0';
+    free ( data );
+
+    return buffer;
 }
 
 Errors_t Search_Tokens ( struct Language_t *language )  // copy_pasta
@@ -201,68 +267,31 @@ $
     return Search_Free_Cell ( language );
 }
 
-Errors_t File_Reader ( struct File_t *file, FILE *input_f )  // +
+void Node_Free ( struct Node_t **tree_node ) // +
 {
-    assert ( file != nullptr );
-    assert ( input_f != nullptr );
+    if ( tree_node != nullptr && *tree_node != nullptr ) {
+        Node_Free ( &((*tree_node)->left) );
+        Node_Free ( &((*tree_node)->right));
 
-    file->file_size = Get_File_Size ( input_f );
+        (*tree_node)->left = nullptr;
+        (*tree_node)->right = nullptr;
 
-    file->out_buffer = ( char *)calloc ( file->file_size + 1, sizeof ( char ) );
-    if ( !file->out_buffer ) {
-
-        return ERR_CALLO;
+        *tree_node = nullptr;
     }
-
-    int ret_code = fread ( file->out_buffer, sizeof( file->out_buffer[0] ), file->file_size, input_f );
-    if ( ret_code != file->file_size  ) {
-        if ( feof ( input_f ) ) {
-            printf ( "Error reading test.bin: unexpected end of file\n" );
-        }
-        else if ( ferror ( input_f ) ) {
-            perror ( "Error reading test.bin" );
-        }
-        return ERR_FREAD;
-    }
-
-    return OK_FILE;
 }
 
-int Get_File_Size ( FILE * f ) // +
+void Language_Dtor ( struct Language_t *language )
 {
-    int prev = ftell ( f );
+    Node_Free ( &(language->tree.start) );
 
-    fseek ( f, 0, SEEK_END );
-    size_t size_not_blue = ftell ( f );
-    fseek ( f, prev, SEEK_SET );
-
-    return size_not_blue;
+    Dynamic_Array_Dtor ( &(language->d_array) );
+    for ( int i = 0; i < language->cell_n; ++i ) {
+        free ( language->name_cell[i].data );
+    }
+    free ( language->name_cell );
 }
 
-char *File_Skip_Spaces ( char *data, int file_size )   // +
-{
-    assert ( data != nullptr );
-    assert ( file_size != 0  );
-
-    char *buffer = (char *)calloc ( ( file_size + 1 ) * sizeof ( data[0] ), 1 );
-    if ( buffer == nullptr ) {
-
-        return buffer;
-    }
-
-    int position = 0;
-
-    for ( ; *data != '\0'; ++data ) {
-        while ( isspace ( *data ) ) {
-            ++data;
-        }
-        buffer[position++] = *data;
-    }
-    buffer[position] = '\0';
-
-    return buffer;
-}
-
+////////////////////////////////////////////////////////////////
 Node_t *Create_Node ( Node_Type_t option, int value, struct Node_t *left, struct Node_t *right ) // +
 {
     struct Node_t *tree_c = ( Node_t *)calloc ( 1, sizeof ( Node_t ) );
@@ -475,22 +504,6 @@ $           return language->name_cell[tree_node->value].data;
     return "error";
 }
 
-Errors_t FromType_ToOption ( struct Node_t *tree_node ) // ----
-{
-    if ( !tree_node || tree_node->type != NODE_TYPE_OP ) {
-
-        return OK_TREE;
-    }
-    /*if ( tree_node->type == OP ) {
-        tree_node->value = (Node_Type_t)tree_node->value;
-        // error
-    } */
-    FromType_ToOption ( tree_node->left  );
-    FromType_ToOption ( tree_node->right );
-
-    return OK_TREE;
-}
-
 /*Node_t *d ( const struct Node_t *tree )  // +
 {
     if ( tree == nullptr ) {
@@ -631,169 +644,3 @@ void Optimization ( struct Node_t *tree )  // -
         }
     } while ( prev_occuttences_n != occurrences_n );
 }
-
-void Node_Free ( struct Node_t **tree ) // +
-{
-    if ( *tree != nullptr ) {
-        Node_Free ( &((*tree)->left) );
-        Node_Free ( &((*tree)->right));
-
-        (*tree)->left = nullptr;
-        (*tree)->right = nullptr;
-
-        (*tree) = nullptr;
-    }
-}
-
-void Back_End ( struct Language_t *language, const struct Node_t *tree_node )
-{
-    assert ( language != nullptr );
-
-    if ( tree_node == nullptr ) {
-$
-        return ;
-    }
-
-    if ( tree_node->type == NODE_TYPE_FUNC && ( tree_node->right != nullptr )  ) {
-$       fprintf ( language->out_file, "\n: %d;\t\\\\%s\n", language->name_cell[tree_node->value].name_code, language->name_cell[tree_node->value].data );
-    }
-    else if ( tree_node->type == NODE_TYPE_FUNC && ( tree_node->right == nullptr )  ) {
-        printf ( "NUMBER OF ARG %d\n", language->name_cell[tree_node->value].value );
-        //Back_End ( language, tree_node->left  );
-        //
-$       fprintf ( language->out_file, "call %d;\n", language->name_cell[tree_node->value].name_code );
-        language->id += 2;
-
-        return ;
-    }
-    else if ( tree_node->type == NODE_TYPE_OP && tree_node->value == OP_EQUAL ) {
-        Back_End ( language, tree_node->right );
-$       fprintf ( language->out_file, "pop r%cx;\n", language->name_cell[tree_node->left->value].name_code + 'a' );
-        language->id += 2;
-
-        return ;
-    }
-    else if ( tree_node->type == NODE_TYPE_VAR ) {
-        //Back_End ( language, tree_node->left  );
-$       fprintf ( language->out_file, "push r%cx;\n", language->name_cell[tree_node->value].name_code + 'a' );
-        language->id += 2;
-        //return;
-    }
-    else if ( tree_node->type == NODE_TYPE_NUM ) {
-$       fprintf ( language->out_file, "push %d;\n", tree_node->value );
-        language->id += 2;
-    }
-    else if ( tree_node->type == NODE_TYPE_OP && ( tree_node->value == OP_EQUIVALENCE ) ) {   // > < >= <=
-        Back_End ( language, tree_node->left  );
-        Back_End ( language, tree_node->right );
-        language->id += 2;
-$       fprintf ( language->out_file, "%s %d;\n", Get_Op_Asm_Code ( tree_node->value ), language->operator_counter );
-
-        return ;
-    }
-    else if ( tree_node->type == NODE_TYPE_OP && tree_node->value != OP_CONNECT && tree_node->value != OP_SEMICLON ) {   // ;
-        Back_End ( language, tree_node->left  );
-        Back_End ( language, tree_node->right );
-        language->id += 1;
-$       fprintf ( language->out_file, "%s;\n", Get_Op_Asm_Code ( tree_node->value ) );
-
-        return ;
-    }
-    else if ( tree_node->type == NODE_TYPE_RETURN ) {
-        language->id += 1;
-        //
-        Back_End ( language, tree_node->left );
-$       fprintf ( language->out_file, "ret;\n" );
-
-        return ;
-    }
-    else if ( tree_node->type == NODE_TYPE_IF || tree_node->type == NODE_TYPE_ELSE ) { // else
-        Back_End ( language, tree_node->left  );
-        fprintf ( language->out_file, "call %d;\n", language->operator_counter + 1 );
-        language->id += 2;
-        fprintf ( language->out_file, "\n: %d;\n", language->operator_counter );
-
-        Back_End ( language, tree_node->right );
-        fprintf ( language->out_file, "ret;\n\n" ); // +1
-        fprintf ( language->out_file, "\n: %d;\t\n", language->operator_counter + 1 );  ////
-        fprintf ( language->out_file, "jmp %d;\n", language->id + 4 ); // +3
-        fprintf ( language->out_file, "ret;\n\n" );     // +4
-
-        language->id += 4;
-        language->operator_counter += 2;
-
-        return ;
-    }
-    else if ( tree_node->type == NODE_TYPE_WHILE ) { // else
-        int prev_id = language->id;
-        Back_End ( language, tree_node->left );
-        fprintf ( language->out_file, "call %d;\n", language->operator_counter + 1 );
-        language->id += 2;
-        fprintf ( language->out_file, "\n: %d;\n", language->operator_counter );
-
-        Back_End ( language, tree_node->right );
-        fprintf ( language->out_file, "jmp %d;\n", prev_id );  // +2
-        fprintf ( language->out_file, "ret;\n\n" ); // +3
-        fprintf ( language->out_file, "\n: %d;\t\n", language->operator_counter + 1 );  ////
-        fprintf ( language->out_file, "jmp %d;\n", language->id + 6 ); // +4
-        fprintf ( language->out_file, "ret;\n\n" );     // +5
-
-        language->id += 4;
-        language->operator_counter += 2;
-
-        return ;
-    }
-
-    Back_End ( language, tree_node->left  );
-    Back_End ( language, tree_node->right );
-
-}
-
-const char *Get_Op_Asm_Code ( int value )
-{
-    switch ( value ) {
-        case OP_ADD : {
-
-            return "add";
-        }
-        break;
-        case OP_SUB : {
-
-            return "sub";
-        }
-        break;
-        case OP_DIV : {
-
-            return "div";
-        }
-        break;
-        case OP_MUL : {
-
-            return "mul";
-        }
-        break;
-        case OP_EQUIVALENCE : {
-
-            return "je"; // %d", language->if_while_code_counter; //
-        }
-        break;
-        case OP_MORE : {
-
-            return "jb";
-        }
-        break;
-        case OP_LESS : {
-
-            return "ja";
-        }
-        break;
-        default : {
-            printf ( "ASM CODE ERROR \n" );
-        }
-        break;
-    }
-
-    return "ASM CODE ERROR";
-}
-
-
