@@ -134,7 +134,7 @@ Error_t Assembler_Compare ( struct Asm_t *assembler, Line_t *line_array )  //nam
 
 $   for ( int i = 0; i < n_commands; ++i ) {
 $       if ( strcmp ( line_array->start, command_arr[i].str ) == 0 ) {  // separate jmp
-            if ( i == JA  || i == JB  || i == JE ||
+            if ( i == JA  || i == JB  || i == JE  || i == MJM ||
                  i == JAE || i == JBE || i == JNE || i == CALL ) {
                 Stack_Push ( &(assembler->stack), ( const_passed << 5 ) | command_arr[i].code );
                 Stack_Push ( &(assembler->stack), assembler->labels_array[line_array->element] );

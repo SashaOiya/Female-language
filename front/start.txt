@@ -1,11 +1,17 @@
-main ( ) {
+castle ( ) {
 	x = 3;
-	if ( x < 4 ) {
-		if ( x ~ 1 ) {
-			x = 2;
-		}
-		x = 1 + x ;
-	}
-	return (x);
+	lox ();
+	x = 153;
+	leavemealone (x);
 }
+
+lox ()
+{
+	x = x - 1;
+	one minute ( x > 0 ) {
+		lox();
+	}
+	leavemealone ();
+}
+	
 

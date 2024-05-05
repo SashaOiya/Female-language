@@ -2,27 +2,27 @@
 : 0;	\\main
 push 3;
 pop rbx;
-push rbx;
-push 4;
-ja 2;
-jmp 33;
-
-: 2;
-push rbx;
-push 1;
-je 3;
-jmp 26;
-
-: 3;
-push 2;
+call 2;
+push 153;
 pop rbx;
-ret;
-
-push 1;
-push rbx;
-add;
-pop rbx;
-ret;
-
 push rbx;
 hlt;
+
+: 2;	\\lox
+push rbx;
+push 1;
+sub;
+pop rbx;
+push rbx;
+push 0;
+jb 3;
+mjm 4;
+
+: 3;
+call 2;
+jmp 20;
+
+: 4;	
+jmp 34;
+
+ret;

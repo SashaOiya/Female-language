@@ -9,7 +9,6 @@
 #include <string.h>
 #include <time.h>
 #include "dynamic_array.h"
-//#include "log.h"
 
 const int cell_mul_coeff = 2;
 const int energency_val  = -1;
@@ -77,35 +76,27 @@ struct Language_t {
     int id = 0;
 };
 
+Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name );
+void     Language_Dtor ( struct Language_t *language );
+
 Errors_t File_Reader ( struct File_t *File, FILE *input_f );
-int Get_File_Size ( FILE * f );
+char *   File_Skip_Spaces ( char *data, int file_size );
+int      Get_File_Size ( FILE * f );
 
-void Tree_Dump_Body ( const struct Language_t *language, const struct Node_t *tree, FILE *tree_dump );
-Errors_t Tree_Graph_Dump (const struct Language_t *language );
-void Tree_Text_Dump ( const struct Language_t *language, const struct Node_t *tree_node );
-
-double Eval ( const struct Node_t *node );
-Node_t *Create_Node ( Node_Type_t option, int value, struct Node_t *left, struct Node_t *right );
-char *File_Skip_Spaces ( char *data, int file_size );
-void Node_Free ( struct Node_t **tree );
-
-Node_t *d ( const struct Node_t *tree );
-Node_t *Copy_Node ( const struct Node_t *tree);
-
-int Optimization_Const ( struct Node_t *tree );
-int Optimization_Option ( struct Node_t **tree );
-void Optimization ( struct Node_t *tree );
-
-void File_Write_Front ( const struct Node_t *tree );
-void File_Write_Asm_Text ( const struct Node_t *tree, FILE *start_f );
-
+Errors_t Tree_Graph_Dump ( const struct Language_t *language );
+void     Tree_Dump_Body  ( const struct Language_t *language, const struct Node_t *tree, FILE *tree_dump );
+void     Tree_Text_Dump  ( const struct Language_t *language, const struct Node_t *tree_node );
 const char *Get_Dump_Op_Name ( const struct Language_t *language, const struct Node_t *tree_node );
 
-Errors_t Search_Tokens ( struct Language_t *language );
-int Search_Free_Cell ( struct Language_t *language );
-int Search_Func_Var_Name ( struct Language_t *language, char* name, const Node_Type_t type );
+//double Eval ( const struct Node_t *node );
+Node_t *Create_Node ( Node_Type_t option, int value, struct Node_t *left, struct Node_t *right );
+Node_t *Copy_Node ( const struct Node_t *tree);
+void Node_Free ( struct Node_t **tree );
 
-Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name );
-void Language_Dtor ( struct Language_t *language );
+//Node_t *d ( const struct Node_t *tree );
+
+Errors_t Search_Tokens        ( struct Language_t *language );
+int      Search_Free_Cell     ( struct Language_t *language );
+int      Search_Func_Var_Name ( struct Language_t *language, char* name, const Node_Type_t type );
 
 #endif  // FRONT_END

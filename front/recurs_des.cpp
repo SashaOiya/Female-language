@@ -240,7 +240,14 @@ Node_t *Get_Statement ( struct Position_t *position )
 
         assert ( position->data[position->index].cell_code == '(' );    //
 
-        Node_t *exp_node_left = Get_Expression ( position );
+        Node_t *exp_node_left = nullptr ;
+
+        if ( position->data[position->index+1].cell_code != ')' ) {
+            exp_node_left = Get_Expression ( position );
+        }
+        else {
+            (position->index) += 2;
+        }
 
         new_node = Create_Node ( prev_type, position->data[position->index].cell_code, exp_node_left, nullptr );
 

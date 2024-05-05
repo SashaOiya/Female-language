@@ -164,7 +164,7 @@ $
             }
             break;
         case JA : {
-                Stack_Push ( ret_stack, *ip );  //
+                //Stack_Push ( ret_stack, *ip );  //
                 elem_t temp_1 = Stack_Pop ( &(vm_spu->stack) );
                 elem_t temp_2 = Stack_Pop ( &(vm_spu->stack) );
                 if ( temp_1 > temp_2 ) {
@@ -173,7 +173,7 @@ $
             }
             break;
         case JAE : {
-                Stack_Push ( ret_stack, *ip );
+                //Stack_Push ( ret_stack, *ip );
                 elem_t temp_1 = Stack_Pop ( &(vm_spu->stack) );
                 elem_t temp_2 = Stack_Pop ( &(vm_spu->stack) );
                 if ( temp_1 >= temp_2 ) {
@@ -182,7 +182,7 @@ $
             }
             break;
         case JNE : {
-                Stack_Push ( ret_stack, *ip );
+                //Stack_Push ( ret_stack, *ip );
                 elem_t temp_1 = Stack_Pop ( &(vm_spu->stack) );
                 elem_t temp_2 = Stack_Pop ( &(vm_spu->stack) );
                 if ( temp_1 != temp_2 ) {
@@ -191,7 +191,7 @@ $
             }
             break;
         case JE : {
-                Stack_Push ( ret_stack, *ip );
+                //Stack_Push ( ret_stack, *ip );
                 elem_t temp_1 = Stack_Pop ( &(vm_spu->stack) );
                 elem_t temp_2 = Stack_Pop ( &(vm_spu->stack) );
                 if ( temp_1 == temp_2 ) {
@@ -200,7 +200,7 @@ $
             }
             break;
         case JB : {
-                Stack_Push ( ret_stack, *ip );   //
+                //Stack_Push ( ret_stack, *ip );   //
                 elem_t temp_1 = Stack_Pop ( &(vm_spu->stack) );
                 elem_t temp_2 = Stack_Pop ( &(vm_spu->stack) );
                 if ( temp_1 < temp_2 ) {
@@ -209,7 +209,7 @@ $
             }
             break;
         case JBE : {
-                Stack_Push ( ret_stack, *ip );
+                //Stack_Push ( ret_stack, *ip );
                 elem_t temp_1 = Stack_Pop ( &(vm_spu->stack) );
                 elem_t temp_2 = Stack_Pop ( &(vm_spu->stack) );
                 if ( temp_1 <= temp_2 ) {
@@ -225,6 +225,10 @@ $
         case CALL : {
 $               Stack_Push ( ret_stack, *ip );
 $               *ip = value - 1;
+            }
+            break;
+        case MJM : {
+                *ip = value - 1;
             }
             break;
        default : {

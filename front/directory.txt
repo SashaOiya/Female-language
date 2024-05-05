@@ -23,9 +23,11 @@ print ->
 Var_Def := ident '=' Get_Comparison ';'
 Func_Def := [ ident '(' ')' Statement_List ]* 
 Statement_List := '{' [statement]* '}'
-statement := Var_Def | If | While | Get_Func ( ident '(' ')' ';' ) | ';' // comparison
+statement := Var_Def | If | Retutn | While | Else | Get_Func ( ident '(' ')' ';' ) | ';' // comparison
 While := 'while' '(' Get_Comparison ')' Statement_List
+Return := 'return' '(' Get_Exp ')' ';'
 If := 'if' '(' Get_Comparison ')' Statement_List
+Else := 'else' '(' Get_Comparison ')' Statement_List
 Get_Comparison := Get_Exp  [ [ '>', '<', '==' ] Get_exp ]*
 Get_Exp := Get_Term [ [ '*', '/' ] Get_Term*
 Get_Term := Get_Partititon [ [ '+', '-' ] Get_Partition ]*

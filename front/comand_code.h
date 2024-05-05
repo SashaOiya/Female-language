@@ -23,7 +23,8 @@ enum Code {
     JE    = 18,
     JNE   = 19,
     CALL  = 20,
-    RET   = 21
+    RET   = 21,
+    MJM   = 22
 };
 
 struct Command_t {
@@ -31,7 +32,7 @@ struct Command_t {
     int code;
 };
 
-const struct Command_t command_arr[22] = {
+const struct Command_t command_arr[23] = {
                                           { "push", PUSH  }, { "hlt" , HLT  }, { "add" , ADD },
                                           { "mul" , MUL   }, { "sqrt", SQRT }, { "sin" , SIN },
                                           { "cos" , COS   }, { "div" , DIV  }, { "sub" , SUB },
@@ -39,7 +40,7 @@ const struct Command_t command_arr[22] = {
                                           { ":"   , COLON }, { "jmp" , JMP  }, { "ja"  , JA  },
                                           { "jae" , JAE   }, { "jb"  , JB   }, { "jbe" , JBE },
                                           { "je"  , JE    }, { "jne" , JNE  }, { "call", CALL },
-                                          { "ret" , RET   }
+                                          { "ret" , RET   }, { "mjm", MJM }
                                          };
 
 #endif  // COMAND_CODE

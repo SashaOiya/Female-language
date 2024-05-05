@@ -55,6 +55,7 @@ Errors_t Language_Ctor ( struct Language_t *language, char *input_file_name ) //
     // dtor all
 
     Dymanic_Array_Ctor ( &language->d_array );   // dtor
+    printf ( "%s\n", language->file.out_buffer );
     Search_Tokens ( language );
     // errors
 
@@ -138,22 +139,22 @@ Errors_t Search_Tokens ( struct Language_t *language )  // copy_pasta
         int counter = 0;
         Token_t token = {};
 
-        for ( ; isalpha ( language->file.out_buffer[i] ); ++i, ++counter )  {    //
+        for ( ; isalpha ( language->file.out_buffer[i] ) ; ++i, ++counter )  {    //
             element_name[counter] = language->file.out_buffer[i];
         }
 $       element_name[counter] = '\0';
 
         if ( counter > 0 ) {   /////// howwwwwwwwwwwwwww :((((
-            if ( strcmp ( element_name, "if" ) == 0 ) {
+            if ( strcmp ( element_name, "itakenooffence" ) == 0 ) {    // я не обижаюсь
                 token.type = NODE_TYPE_IF;
             }
-            else if ( strcmp ( element_name, "else" ) == 0 ) {
+            else if ( strcmp ( element_name, "iamoffended" ) == 0 ) {     // я обиделась
                 token.type = NODE_TYPE_ELSE;
             }
-            else if ( strcmp ( element_name, "while" ) == 0 ) {
+            else if ( strcmp ( element_name, "oneminute" ) == 0 ) {    // ещё минуту
                 token.type = NODE_TYPE_WHILE;
             }
-            else if ( strcmp ( element_name, "return" ) == 0 ) {
+            else if ( strcmp ( element_name, "leavemealone" ) == 0 ) {  // отстань
                 token.type = NODE_TYPE_RETURN;
             }
             else if ( language->file.out_buffer[i] == '(' ) {
@@ -176,11 +177,15 @@ $           }
         else if ( counter == 0 ) {
             int sign = 1;
             if ( language->file.out_buffer[i] == '-' ) {
-                sign = -1;
-                ++i;
+                if ( isalpha ( language->file.out_buffer[i-1] ) || isdigit ( language->file.out_buffer[i-1] ) ) {
+                }
+                else {
+                    sign = -1;
+                    ++i;
+                }
             }
 
-            for ( ; isdigit ( language->file.out_buffer[i] ); ++i, ++counter )  {    //
+            for ( ; isdigit ( language->file.out_buffer[i] ) ; ++i, ++counter )  {    //
                 element_name[counter] = language->file.out_buffer[i];
             }
 $           element_name[counter] = '\0';
@@ -286,19 +291,6 @@ void Language_Dtor ( struct Language_t *language ) // +?
 }
 
 ////////////////////////////////////////////////////////////////
-Node_t *Create_Node ( Node_Type_t option, int value, struct Node_t *left, struct Node_t *right ) // +
-{
-    struct Node_t *tree_c = ( Node_t *)calloc ( 1, sizeof ( Node_t ) );
-    if ( !tree_c ) {
-        free ( tree_c );
-    }
-    tree_c->type = option;
-    tree_c->value = value;
-    tree_c->left = left;
-    tree_c->right = right;
-
-    return tree_c;
-}
 
 void Tree_Text_Dump ( const struct Language_t *language, const struct Node_t *tree_node ) // +
 {
@@ -566,75 +558,17 @@ Node_t *Copy_Node ( const struct Node_t *tree)
     return new_tree;
 }
 
-int Optimization_Const ( struct Node_t *tree ) // -
+Node_t *Create_Node ( Node_Type_t option, int value, struct Node_t *left, struct Node_t *right ) // +
 {
-$   if ( tree == nullptr || tree->right == nullptr || tree->left == nullptr ) {
-
-        return 0;
+    struct Node_t *tree_c = ( Node_t *)calloc ( 1, sizeof ( Node_t ) );
+    if ( !tree_c ) {
+        free ( tree_c );
     }
-$   if ( tree->left->type  == NODE_TYPE_NUM &&
-         tree->right->type == NODE_TYPE_NUM  ) {
+    tree_c->type = option;
+    tree_c->value = value;
+    tree_c->left = left;
+    tree_c->right = right;
 
-$       //tree->value = (int)Eval ( tree );
-$       tree->type = NODE_TYPE_NUM;
-$       Node_Free ( &(tree->left  ) );
-$       Node_Free ( &(tree->right ) );
-
-        return OK_OCCURR;
-    }
-    else {
-$       return ( Optimization_Const ( tree->left ) ||
-                 Optimization_Const ( tree->right ) );
-    }
+    return tree_c;
 }
 
-int Optimization_Option ( struct Node_t **tree )  // -
-{
-$   if ( (*tree) == nullptr  ) {
-
-        return 0;
-    }
-$   if ( (*tree)->type == NODE_TYPE_OP && (*tree)->value == OP_MUL ) {
-        if ( (*tree)->left->value  == 0 || (*tree)->right->value == 0 ) {
-$           (*tree)->value = 0;
-$           (*tree)->type  = NODE_TYPE_NUM;
-$           Node_Free ( &((*tree)->left ) );
-$           Node_Free ( &((*tree)->right ) );
-
-            return OK_OCCURR;
-        }
-        if ( (*tree)->left->value  == 1 ) {  // func
-            Node_Free ( &((*tree)->left ) );
-            (*tree) = (*tree)->right;
-
-            return OK_OCCURR;
-        }
-        else if ( (*tree)->right->value == 1 ) {
-            Node_Free ( &((*tree)->right ) );
-            *tree = (*tree)->left; // for this moment
-
-            return OK_OCCURR;
-        }
-
-        return 0;
-    }
-    else {
-$       return ( Optimization_Option ( &(*tree)->left ) ||
-                 Optimization_Option ( &(*tree)->right )  );
-    }
-}
-
-void Optimization ( struct Node_t *tree )  // -
-{
-    int occurrences_n = 0;
-    int prev_occuttences_n = 0;
-
-    do {
-        prev_occuttences_n = occurrences_n;
-        if ( Optimization_Const  ( tree) ||
-             Optimization_Option ( &tree ) ) {
-            ++occurrences_n;
-            //Tree_Text_Dump ( tree );
-        }
-    } while ( prev_occuttences_n != occurrences_n );
-}
