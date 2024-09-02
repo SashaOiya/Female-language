@@ -1,0 +1,36 @@
+: 0; // main  fibonachi(cikl) kvadratka
+in;
+pop rax;
+push rax;
+call 3;
+hlt;
+
+: 3; //
+push rax;
+push 0;
+je 4;
+push rax;
+push 1;
+jb 1;
+ret;
+
+: 4; //
+pop;
+push 1;
+ret;
+
+: 1; 	// 
+call 2;
+push 1;
+push rax;
+ja 1;
+ret;
+
+: 2;	// 
+push 1;
+push rax;
+sub;
+pop rax;
+push rax;
+mul;
+ret;

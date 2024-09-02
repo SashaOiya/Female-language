@@ -1,228 +1,321 @@
 //#include "front.h"
 #include "recurs_des.h"
 
-Node_t *Get_General ( struct Language_t *language )
+Node_t *GetG ( char *buffer, struct Node_t *Tree ) //const  // +
 {
-    assert ( language != nullptr );
+    struct Position_t Position = {};
+    Position.name_storage= (Name_t *)calloc ( size, sizeof ( Name_t ) ); // change
+    Position.data = buffer;
+    Position.index = 0;
+    // free //my_assert
+    Tree = GetFunc( &Position ); // return
+    //assert ( Position.data[Position.index] == '\0' );
 
-    struct Position_t position = {};
-    position.data = language->d_array.data;
-    assert ( position.data != nullptr );
-    position.index = 0;
-    language->tree.start = Get_Statement_List ( &position );
-
-    return language->tree.start;
+    return Tree;
 }
 
-int Get_Binary_Element ( const struct Token_t token, const enum Mode_t mode )
+Node_t *Get_Number ( struct Position_t *Position )  // +
 {
-    if ( token.type == NODE_TYPE_OP && mode == MODE_ADD_SUB &&
-       ( token.cell_code == '+' || token.cell_code == '-' ) ) {
+    int val = 0;
+    int prev_index = Position->index;
 
-        return token.cell_code;
+    while ( isdigit ( Position->data[Position->index] ) ) {
+        val = val * 10 + Position->data[Position->index] - '0';
+        ++(Position->index);
     }
-    else if ( token.type == NODE_TYPE_OP && mode == MODE_MUL_DIV &&
-            ( token.cell_code == '*' || token.cell_code == '/' ) ) {
+    //assert ( Position->index > prev_index );
 
-        return token.cell_code;
+    return Create_Node ( NUM, val, nullptr, nullptr );
+}
+
+Node_t *GetId ( struct Position_t *Position )
+{
+    char arg[20] = "";
+    int counter = 0;
+
+    while ( isalpha ( Position->data[Position->index] ) != 0 )
+    {
+        sprintf (arg + counter, "%c", Position->data[Position->index] );
+        (Position->index)++;
+        counter++;
     }
-    else if ( token.type == NODE_TYPE_OP && mode == MODE_MORE_LESS_EQUAL &&
-            ( token.cell_code == '>' || token.cell_code == '<' || token.cell_code == '=' ) ) {
+    printf ( "arg debug : %s\n", arg); // degug
+    if ( Position->data[Position->index] == '(' ) {
+        int func_name_code = Search_Func_Name ( arg, Position->name_storage );     // name
+        //printf ("func_code = %d\n", func_name_code);  // debug
+        (Position->index)++;
+        Node_t* val = GetE ( Position );
+        (Position->index)++;
 
-        return token.cell_code;
+        return Create_Node ( FUNC, func_name_code, nullptr, val );
+    }
+
+    return Create_Node ( VAR, Search_Var_Name ( arg, Position->name_storage ), nullptr, nullptr );
+}
+
+Node_t *GetE ( struct Position_t *Position )  // +
+{
+    Node_t *val = GetT ( Position );
+
+    while ( Position->data[Position->index] == '+' ||
+            Position->data[Position->index] == '-' )
+    {
+        int element = Position->data[Position->index];
+        (Position->index)++;
+        Node_t *val_2 = GetT ( Position );
+
+        switch ( element ) {
+            case '+' : {
+                val = Create_Node( OP, OP_ADD, val, val_2 );
+                break;
+            }
+            case '-' : {
+                val = Create_Node( OP, OP_SUB, val, val_2 );
+                break;
+            }
+            default : {
+                printf ( "Error" );
+                break;
+            }
+        }
+    }
+    return val;
+}
+
+Node_t *GetT ( struct Position_t *Position )  // +
+{
+    Node_t *val = GetP ( Position );
+
+    while ( Position->data[Position->index] == '*' ||
+            Position->data[Position->index] == '/' ) {
+        char element = Position->data[Position->index];
+        (Position->index)++;
+
+        Node_t *val_2 = GetP ( Position );
+
+        switch ( element ) {
+            case '*' : {
+                val = Create_Node( OP, OP_MUL, val, val_2 );
+                break;
+            }
+            case '/' : {
+                val = Create_Node( OP, OP_DIV, val, val_2 );
+                break;
+            }
+            default : {
+                printf ( "Error" );    // more information
+                break;
+            }
+        }
+    }
+    return val;
+}
+
+Node_t *GetP ( struct Position_t *Position )  // +
+{
+    if ( Position->data[Position->index] == '(' ) {
+        Node_t *val = nullptr;
+        (Position->index)++;
+        val = GetE ( Position );
+
+        //assert ( Position->data[Position->index] == ')' );
+        (Position->index)++;
+
+        return val;
+    }
+    else if ( isalpha ( Position->data[Position->index] ) ) {
+
+        Node_t *val = GetId ( Position );
+
+        // function Id '(' E ')'
+
+        return val;
+    }
+    else {
+
+        return Get_Number ( Position );
+    }
+}
+
+Node_t* GetA ( struct Position_t *Position )  // +- comment
+{
+    Node_t* val = GetE ( Position );
+    // изменить и не давать ставить знаки сравнения в теле циклов и условных операторов
+    if ( Position->data[Position->index] == '=' ||
+         Position->data[Position->index] == '>' ||
+         Position->data[Position->index] == '<') // добавить больше/меньше
+    {
+        char operation = Position->data[Position->index];
+        (Position->index)++;
+        Node_t* val_2 = GetId ( Position );
+
+        return Create_Node( OP, operation, val, val_2 ); //
+    }
+    return val;
+}
+
+Node_t *GetFunc ( struct Position_t *Position )  // + comment
+{
+    char arg[20] = {};
+    int counter = 0;
+    int old_position = Position->index;
+
+    while ( isalpha ( Position->data[Position->index] ) )  {
+        sprintf ( arg + counter, "%c", Position->data[Position->index] );
+        (Position->index)++;  // up
+        counter++;   // counter ++
+    }
+
+    if ( Position->data[Position->index] == '(' ) // for functions without an argument
+    {
+        (Position->index)++;
+
+        if ( Position->data[Position->index] == ')' ) {
+            (Position->index)++;
+        }
+        Node_t* val = GetLim ( Position );    // change name
+        //printf ("dot = %c\n", Position->data[Position->index] ); // debug
+        (Position->index)++;
+
+        if ( Position->data[Position->index] == '\0' ) { // change
+            return Create_Node ( FUNC_HEAD, Search_Func_Name ( arg, Position->name_storage ), val, nullptr ); // add more argument
+        }
+        else {   // wtf     // if '\n'
+            return Create_Node ( FUNC_HEAD, Search_Func_Name ( arg, Position->name_storage ), val, GetFunc ( Position) );  // this
+        }
+    }
+    Position->index = old_position; // wtf
+
+    return GetLim ( Position );
+}
+
+Node_t *GetLim ( struct Position_t *Position )   // + comment  // my designation
+{
+    char arg[20] = {};// name and number
+    int counter = 0;
+    int old_position = Position->index;
+
+    while ( isalpha ( Position->data[Position->index] ) )  {
+        sprintf ( arg + counter, "%c", Position->data[Position->index] );
+        (Position->index)++;  // up
+        counter++;   // counter ++
+    }
+
+    if ( strcmp ( arg, "if") == 0 || strcmp ( arg, "while" ) == 0 ) {
+        Node_t* val = nullptr;
+
+        if ( strcmp ( arg, "if" ) == 0 ) {
+            val = Create_Node ( KEY_WORD, KEY_W_IF, GetDifferentCond ( Position ), GetOp ( Position ) ); //NewNode (KWR, IF, val, val2);
+        }
+        else if ( strcmp (arg, "while" ) == 0 ) {
+            val = Create_Node ( KEY_WORD, KEY_W_WHILE, GetDifferentCond ( Position ), GetOp ( Position ) );
+        }
+        (Position->index)++;
+
+        if ( Position->data[Position->index] != '.' &&  // wtf
+             Position->data[Position->index] != '/')   // my designation
+        {
+            Node_t* val2 = GetLim ( Position );   // name
+            return Create_Node ( OP, SLASH, val, val2 );
+        }
+        return Create_Node ( OP, SLASH, val, nullptr );
+    }
+    Position->index = old_position;    // why
+    Node_t* val = GetA ( Position );
+    int prev_index = Position->index;  // prev_index
+    (Position->index)++;
+
+    if ( Position->data[Position->index] != '/' &&
+         Position->data[Position->index] != '.') { // все лежит в функциях => не может закончится \0
+
+        Node_t* val2 = GetLim ( Position );    // name
+
+        return Create_Node ( OP, LIMIT, val, val2 );
+    }
+    else if ( Position->data[Position->index] == '/' &&
+              Position->data[prev_index]      == '`' ) {
+
+        return Create_Node ( OP, LIMIT, val, nullptr );
+    }
+    else if ( Position->data[Position->index] == '/' ) {
+
+        return Create_Node ( OP, SLASH, val, nullptr );
+    }
+
+    return Create_Node ( OP, LIMIT, val, nullptr );
+}
+
+Node_t* GetOp ( struct Position_t *Position )
+{
+    if ( Position->data[Position->index] == '\\') {
+        printf ("OPPPPP\n");    // degug
+        (Position->index)++;
+
+        return GetLim ( Position );
     }
 
     return 0;
 }
 
-Node_t *Get_Expression ( struct Position_t *position )
+Node_t* GetDifferentCond ( struct Position_t *Position )  // change all
 {
-    assert ( position != nullptr );
+    Node_t* val = GetA ( Position );   // name
 
-    Node_t *term_node = Get_Term ( position );
+    if ( Position->data[Position->index] == '&' ) {
+        (Position->index) += 2;
+        Node_t* val2 = GetDifferentCond ( Position );
 
-    for ( int element = 0;( element = Get_Binary_Element ( position->data[position->index], MODE_ADD_SUB ) ) != 0; ) {
-        int prev_cell = position->index;
-        (position->index)++;
-        Node_t *term_node_right = Get_Term ( position );
-
-        term_node = Create_Node ( NODE_TYPE_OP, element, term_node, term_node_right );
-        term_node->token_n = prev_cell;
+        return Create_Node ( OP, AND, val, val2 );
     }
 
-    return term_node;
+    return val;
 }
 
-Node_t *Get_Term ( struct Position_t *position )
+int Search_Func_Name ( char* name, Name_t *name_cell )   // change all
 {
-    assert ( position != nullptr );
+    for (int i = 0; i < size; i++) {
+        if ( name_cell[i].type == FUNC ) {
+            if (strcmp (name, name_cell[i].value) == 0) {
 
-    Node_t *part_node = Get_Power ( position );
-
-    for ( int element = 0; ( element = Get_Binary_Element ( position->data[position->index], MODE_MUL_DIV ) ) != 0; ) {
-        int prev_cell = position->index;
-        (position->index)++;
-        Node_t *part_node_right = Get_Power ( position );
-
-        part_node = Create_Node( NODE_TYPE_OP, element, part_node, part_node_right );
-        part_node->token_n = prev_cell;
-    }
-
-    return part_node;
-}
-
-Node_t *Get_Partititon ( struct Position_t *position )
-{
-    assert ( position != nullptr );
-
-    struct Node_t *new_node = nullptr;
-    int prev_cell = 0;
-
-    if ( position->data[position->index].type == NODE_TYPE_OP &&
-         position->data[position->index].cell_code == '(' ) {
-
-        (position->index)++;
-        prev_cell = position->index;
-        new_node =  Get_Comparison ( position );
-        (position->index)++;
-
-        return new_node;
-    }
-    else {
-        prev_cell = position->index;
-        new_node = Create_Node ( position->data[position->index].type,
-                                 position->data[position->index].cell_code, nullptr, nullptr );
-    }
-    (position->index)++;
-    new_node->token_n = prev_cell;
-
-    return new_node;
-}
-
-Node_t *Get_Power ( struct Position_t *position )
-{
-    assert ( position != nullptr );
-
-    Node_t *part_node_1 = Get_Partititon ( position );
-
-    while ( position->data[position->index].type == NODE_TYPE_OP &&
-            position->data[position->index].cell_code == '^' ) { // while or if
-        int prev_cell = position->index;
-        (position->index)++;
-        Node_t *part_node_2 = Get_Partititon ( position );
-        part_node_1 = Create_Node( NODE_TYPE_OP, OP_POW, part_node_1, part_node_2 );
-        part_node_1->token_n = prev_cell;
-    }
-
-    return part_node_1;
-}
-
-Node_t *Get_Comparison ( struct Position_t *position )
-{
-    assert ( position != nullptr );
-
-    Node_t *exp_node = Get_Expression ( position );
-
-    for ( int element = 0; ( element = Get_Binary_Element ( position->data[position->index], MODE_MORE_LESS_EQUAL ) ) != 0;  ) {
-        int prev_cell = position->index;
-        (position->index)++;
-        Node_t *exp_node_right = Get_Expression ( position );
-
-        exp_node = Create_Node ( NODE_TYPE_OP, element, exp_node, exp_node_right );
-        exp_node->token_n = prev_cell;
-    }
-
-    return exp_node;
-}
-
-Node_t *Get_Statement_List ( struct Position_t *position )
-{
-    assert ( position != nullptr );
-
-    struct Node_t *new_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, nullptr, nullptr );
-    struct Node_t *start_node = new_node;
-    int prev_cell = 0;
-
-    if ( position->data[position->index].type == NODE_TYPE_OP &&
-         position->data[position->index].cell_code == '{' ) {  // assert  ( == '{' );
-
-        (position->index)++;
-        //prev_cell = position->index;
-        while ( position->data[position->index].type == NODE_TYPE_IF ||
-                position->data[position->index].type == NODE_TYPE_WHILE ||
-                position->data[position->index].type == NODE_TYPE_VAR ||
-                position->data[position->index].type == NODE_TYPE_FUNC ||
-                ( position->data[position->index].type == NODE_TYPE_OP && position->data[position->index].cell_code == OP_SEMICLON ) ) {
-
-            Node_t *state_node = Get_Statement ( position, new_node );
-
-            //if ( state_node != nullptr ) {
-            //    new_node->right = Create_Node ( NODE_TYPE_OP, OP_CONNECT, state_node, nullptr );
-            //}
-            //new_node->right = state_node;
-            //new_node = new_node->right;
-            new_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, new_node, state_node );
-            //new_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, new_node, nullptr ); //not nullptr
+                return name_cell[i].name_code;
+            }
         }
-
-        //assert ( position->data[position->index].cell_code == '}' );
     }
+    int cell = Search_Free_Cell ( name_cell );
+    name_cell[cell].type = FUNC;
+    name_cell[cell].value = strdup ( name );
+    name_cell[cell].name_code = cell;
 
-    return new_node;
+    return cell;
 }
 
-Node_t *Get_Statement ( struct Position_t *position, struct Node_t *node )
+int Search_Free_Cell ( Name_t *name_cell ) // change all
 {
-    assert ( position != nullptr );
+    for (int i = 0; i < size; i++) {
+        if ( name_cell[i].type == free_cell ) {
 
-    Node_t *new_node = nullptr;
-    int prev_cell = 0;
-
-
-    if ( position->data[position->index].type == NODE_TYPE_IF ||
-         position->data[position->index].type == NODE_TYPE_WHILE ) {
-        Node_Type_t prev_type = position->data[position->index].type;
-        int prev_cell = position->index;  //
-        (position->index)++;
-
-        assert ( position->data[position->index].cell_code == '(' );
-
-        Node_t *comp_node_left = Get_Comparison ( position );   // >   <
-
-        assert  ( position->data[position->index].cell_code == '{' );
-
-        new_node = Get_Statement_List ( position );
-
-        new_node = Create_Node ( prev_type, 0, comp_node_left, new_node );     // 0
-        new_node->token_n = prev_cell;
-
-        //assert ( position->data[position->index].cell_code == '}' );
+            return i;
+        }
     }
-    else if ( position->data[position->index].type == NODE_TYPE_OP &&
-              position->data[position->index].cell_code == OP_SEMICLON ) {
-        prev_cell = position->index;
-        (position->index)++;
-        new_node = Create_Node ( NODE_TYPE_OP, OP_SEMICLON, nullptr, nullptr );
-        new_node->token_n = prev_cell;
+    //name_cell = (Name*)realloc (name_cell, size * 2); // передать новое значение size
+    //return size; // опять же это еще старое значение, нужно поменять
+}
 
-        //assert ( position->data[position->index].cell_code == '}' );
+int Search_Var_Name ( char* name, Name_t *name_cell )   // change all
+{
+    for ( int i = 0; i < size; i++ ) {
+        if ( name_cell[i].type == VAR ) {
+            if ( strcmp ( name, name_cell[i].value ) == 0 ) {
+
+                return name_cell[i].name_code;
+            }
+        }
     }
-    else if ( position->data[position->index].type == NODE_TYPE_VAR ) {
-        printf ( "LOX\n" );
-        new_node = Get_Comparison ( position );
-        assert ( position->data[position->index].cell_code == ';' );
-        //(position->index)++;
-    }
-    //assert ( position->data[position->index].cell_code == '}' );
-    (position->index)++;     // maybe not
+    int cell = Search_Free_Cell ( name_cell );
+    name_cell[cell].type = VAR;
+    name_cell[cell].value = strdup (name);
+    name_cell[cell].name_code = cell;
 
-    //node->left = new_node;
-    //if ( new_node != nullptr ) {
-    //node->right = Create_Node ( NODE_TYPE_OP, OP_CONNECT, nullptr, nullptr );
-
-    //    return node->right;
-    //}
-
-    return new_node;
+    return cell;
 }
 

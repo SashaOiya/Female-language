@@ -1,0 +1,27 @@
+#ifndef MY_PROG
+#define MY_PROG
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include "assembler.h"
+
+#ifdef DEBUG
+#define $ printf ( "function <%s> line <%d>\n ", __PRETTY_FUNCTION__, __LINE__ );
+#else
+#define $
+#endif
+
+enum Error_t {
+    NO_ERR      = 0,
+    ENCOD_ERR   = 1,
+    F_WRITE_ERR = 2,
+    F_OPEN_ERR  = 3,
+    MEM_ERR     = 4
+
+};
+
+int GetFileSize ( FILE * f );
+char *TextSkeapSpaces ( Text_t *Text );
+
+#endif  // MY_PROG
