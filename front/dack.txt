@@ -1,0 +1,27 @@
+
+: 0;	\\dacha
+push 5;
+pop rbx;
+push 1;
+pop rcx;
+push rbx;
+push 0;
+jb 3;
+mjm 4;
+
+: 3;
+push rcx;
+push rbx;
+mul;
+pop rcx;
+push rbx;
+push 1;
+sub;
+pop rbx;
+jmp 8;
+
+: 4;	
+jmp 34;
+
+push rcx;
+hlt;

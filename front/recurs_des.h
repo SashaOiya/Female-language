@@ -34,8 +34,9 @@ Node_t *Get_Comparison ( struct Position_t *position );
 
 Node_t *Get_Statement_List ( struct Position_t *position );
 Node_t *Get_Statement ( struct Position_t *position );
-Node_t *Get_Func ( struct Position_t *position );
+Node_t *Get_Func ( struct Position_t *position, struct Language_t *language );
 
 Node_t *Get_Func_Arg ( struct Position_t *position, Node_t **func_node );
+Node_t *Get_Else_Node ( struct Position_t *position );
 
 #endif      // RECURS_DESCENT

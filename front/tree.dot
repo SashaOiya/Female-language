@@ -1,38 +1,59 @@
 digraph G { 
 node [shape = record];
- "00BB8D18"  "00BB8D18" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00BB8D18" -> "00BB1628"  "00BB1628" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "main "];
+ "007C86E0"  "007C86E0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"007C86E0" -> "007C18D0" 
+ "007C86E0" -> "007C8710" 
+ "007C18D0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "castle "];
 
- "00BB1628" -> "00BB8DF0" 
- "00BB8DF0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00BB8DF0" -> "00BB1880" 
- "00BB8DF0" -> "00BB8EE0" 
- "00BB1880" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
-"00BB1880" -> "00BB1850" 
- "00BB1880" -> "00BB1868" 
- "00BB1850" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
- "00BB1868" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "4 "];
- "00BB8EE0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00BB8EE0" -> "00BB0568" 
- "00BB8EE0" -> "00BB8D90" 
- "00BB0568" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "while "];
-"00BB0568" -> "00BB04C0" 
- "00BB0568" -> "00BB0550" 
- "00BB04C0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "~ "];
-"00BB04C0" -> "00BB1898" 
- "00BB04C0" -> "00BB18B0" 
- "00BB1898" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
- "00BB18B0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "3 "];
- "00BB0550" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00BB0550" -> "00BB0538"  "00BB0538" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
-"00BB0538" -> "00BB04D8" 
- "00BB0538" -> "00BB0520" 
- "00BB04D8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
- "00BB0520" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "+ "];
-"00BB0520" -> "00BB04F0" 
- "00BB0520" -> "00BB0508" 
- "00BB04F0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
- "00BB0508" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "1 "];
- "00BB8D90" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
-"00BB8D90" -> "00BB0580"  "00BB0580" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "return "];
+ "007C18D0" -> "007C1768" 
+ "007C1768" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"007C1768" -> "007C1918" 
+ "007C1768" -> "007C1750" 
+ "007C1918" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
+"007C1918" -> "007C18E8" 
+ "007C1918" -> "007C1900" 
+ "007C18E8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "007C1900" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "input "];
+ "007C1750" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"007C1750" -> "007C16F0" 
+ "007C1750" -> "007C1738" 
+ "007C16F0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
+"007C16F0" -> "007C1930" 
+ "007C16F0" -> "007C1948" 
+ "007C1930" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "007C1948" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "lox "];
+ "007C1738" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"007C1738" -> "007C1720"  "007C1720" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "return "];
+"007C1720" -> "007C1708"  "007C1708" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "007C8710" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"007C8710" -> "007C87D0"  "007C87D0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "lox "];
+
+ "007C87D0" -> "007C87A0" 
+ "007C87A0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"007C87A0" -> "007C86B0" 
+ "007C87A0" -> "007C8638" 
+ "007C86B0" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
+"007C86B0" -> "007C8650" 
+ "007C86B0" -> "007C8770" 
+ "007C8650" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "007C8770" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "- "];
+"007C8770" -> "007C8608" 
+ "007C8770" -> "007C8740" 
+ "007C8608" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "007C8740" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "1 "];
+ "007C8638" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"007C8638" -> "007C8758" 
+ "007C8638" -> "007C8680" 
+ "007C8758" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "more "];
+"007C8758" -> "007C87B8" 
+ "007C8758" -> "007C86C8" 
+ "007C87B8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "= "];
+"007C87B8" -> "007C8698" 
+ "007C87B8" -> "007C8728" 
+ "007C8698" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "007C8728" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
+ "007C86C8" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "3 "];
+ "007C8680" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "` "];
+"007C8680" -> "007C8668"  "007C8668" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "return "];
+"007C8668" -> "007C8620"  "007C8620" [shape = Mrecord, style = filled, fillcolor = lightpink  label = "x "];
 }

@@ -1,185 +1,203 @@
 #include "stack.h"
-// stackResize
-/*int main()
+
+Error_t Stack_Ctor ( Stack_t *stack )
 {
-    Stack_Data_t Stack = {};
+    assert ( stack != nullptr );
 
-    StackCtor ( &Stack );
+    #ifdef CANARY_PROTECTION
+    stack->data = (elem_t *)calloc( stack->size_stack * sizeof ( elem_t ) + 2 * sizeof ( canary_t ), 1 );
+    #else
+    stack->data = (elem_t *)calloc( stack->size_stack * sizeof ( elem_t ), 1 );
+    #endif
+    if ( !stack->data ) {
 
-    StackPush ( &Stack, 4 );
-    StackPush ( &Stack, 7 );
-    // if (StackGetStatus( &Stack))
-    StackPop  ( &Stack );
-    StackPush (&Stack, 5);
+        return MEMMORY_ERR;
+    }
+    #ifdef CANARY_PROTECTION
+    stack->data = (elem_t*)((char*)stack->data + sizeof(canary_t) );
+    Canary_Protection ( stack, (elem_t*)((char*)stack->data - sizeof(canary_t) ) );
+    #endif
+$   stack->stack_hash = Stack_Hash ( stack );
 
-    // const Stack*
-    StackDump ( Stack, INFORMATION ); // Chooo???
-
-    StackDtor ( &Stack );
-
-    return 0;
-} */
-
-void StackCtor ( Stack_Data_t *Stack )
-{
-    // assert( Stack);
-    int pointer = sizeof( canary_t ) / sizeof ( elem_t );
-
-    Stack->data = (elem_t *)calloc( Stack->size_stack + 2 * pointer, sizeof ( elem_t ) );
-    assert ( Stack->data != nullptr ); // err
-
-    Stack->data = Stack->data + pointer;
-
-    CanaryProtection ( Stack->data - pointer, Stack );
-$   Stack->stack_hash = StackHash ( Stack );
+    return NO_ERR;
 }
 
-void StackRealloc ( Stack_Data_t *Stack )
+Error_t Stack_Resize ( Stack_t *stack )
 {
-    Stack->size_stack = 2 * (Stack->size_stack); // EXPAND_MULTIPLIER STACK_MULT_COEFF STACK_INCREASE_PARAM
+    assert ( stack != nullptr );
 
-    int pointer = sizeof( canary_t ) / sizeof ( elem_t );
+    stack->size_stack *= stack_mul_coeff;
 
-$   elem_t *canary_begine = (elem_t *)calloc( Stack->size_stack + 2 * pointer , sizeof ( elem_t ) );
-    assert ( canary_begine != nullptr );
+    #ifdef CANARY_PROTECTION
+$   elem_t *canary_begin = (elem_t *)calloc ( stack->size_stack * sizeof ( elem_t ) + 2 * sizeof ( canary_t ), 1 );
+    #else
+    elem_t *canary_begin = (elem_t *)calloc ( stack->size_stack * sizeof ( elem_t ), 1 );
+    #endif
+    if ( !canary_begin ) {
 
-    elem_t *stack_begine = canary_begine + pointer;
+        return MEMMORY_ERR;
+    }
 
-    CanaryProtection ( canary_begine, Stack );
+    #ifdef CANARY_PROTECTION
+    elem_t *stack_begin = (elem_t*)((char*)canary_begin + sizeof(canary_t));
+$   memcpy ( stack_begin, stack->data, stack->size_stack * ( sizeof ( elem_t ) / stack_mul_coeff ) );
+    free ( (char *)stack->data - sizeof ( canary_t ) );
+    stack->data = stack_begin;
+    Canary_Protection ( stack, canary_begin );
+    #else
+    memcpy ( canary_begin, stack->data, stack->size_stack * ( sizeof ( elem_t ) / stack_mul_coeff ) );
+    free ( stack->data );
+    stack->data = canary_begin;
+    #endif
 
-$   memcpy ( stack_begine, Stack->data, Stack->size_stack * sizeof ( elem_t ) / 2 );
-
-    Stack->data = stack_begine;
+    return NO_ERR;
 }
 
-void StackDump ( Stack_Data_t Stack, const char* func_name, const char* file_name )
+void Stack_Dump ( Stack_t *stack, const char* func_name, const char* file_name )
 {
-$   printf ( "Stack [%p] ", Stack.data );
-    name_print( Stack.data )
+    assert ( func_name != nullptr );
+    assert ( file_name != nullptr );
+    assert ( stack     != nullptr );
+
+    Stack_Verificator ( stack );
+
+$   printf ( "Stack [%p] ", stack->data );
     printf ( " called from%s\n "
              "{\n\t%s  \n\t{ \n "
              " \t\tsize = %d \n "
              " \t\tcapacity = %d \n "
-             " \t\tdata [%p]:\n", file_name, func_name, Stack.size_stack, Stack.capacity, Stack.data  );
-$   for ( size_t i = 0; i < Stack.size_stack; ++i ) {
+             " \t\tdata [%p]:\n", file_name, func_name, stack->size_stack, stack->capacity, stack->data  );
+$   for ( int i = 0; i < stack->size_stack; ++i ) {
 $       printf ( "\t\tdata[%d] = ", i );
-        printf ( SPECIFIER, Stack.data[i] );
+        printf ( SPECIFIER, stack->data[i] );
         printf ( "\n" );
     }
 $   printf ( "\t}\n}\n");
 }
 
-void StackDtor ( Stack_Data_t *Stack )
+void Stack_Dtor ( Stack_t *stack )
 {
-    Verificator ( Stack );
-
-$   memset ( Stack->data - sizeof ( canary_t ), 3 /* ? */,
-             Stack->size_stack * sizeof ( elem_t ) + 2 * sizeof ( canary_t ) );
-
-    free ( Stack->data - sizeof ( canary_t ) );
+    assert ( stack != nullptr );
+    Stack_Verificator ( stack );
+$
+    #ifdef CANARY_PROTACTION
+    free ( (char*)stack->data - sizeof ( canary_t ) );
+    #else
+    free ( stack->data );
+    #endif
+    stack->data = nullptr;
 }
 
-void StackPush ( Stack_Data_t *Stack, const elem_t value )
+void Stack_Push ( Stack_t *stack, const elem_t value )
 {
-    assert ( Stack != nullptr );
+    assert ( stack != nullptr );
+    Stack_Rehash ( stack );
+    Stack_Verificator ( stack );
 
-    Verificator ( Stack );
-    StackRehash ( Stack );
+    ++(stack->capacity);
 
-    ++(Stack->capacity);
-
-$   if ( Stack->capacity == Stack->size_stack ) {
-$       StackRealloc ( Stack );
+$   if ( stack->capacity == stack->size_stack ) {
+$       while ( Stack_Resize ( stack ) != NO_ERR ) {     // error
+            ;
+        }
 $   }
-$   *( Stack->data + Stack->capacity - 1 ) = value;
+$   *( stack->data + stack->capacity - 1 ) = value;
 
-    StackHash ( Stack );
+    Stack_Hash ( stack );
 }
 
-elem_t StackPop ( Stack_Data_t *Stack  )
+elem_t Stack_Pop ( Stack_t *stack  )
 {
-    Verificator ( Stack );
-    StackRehash ( Stack );
+    assert ( stack != nullptr );
+    Stack_Rehash ( stack );
+    Stack_Verificator ( stack ); // capacity
 
-    elem_t temp = *( Stack->data + Stack->capacity - 1 );
-    --(Stack->capacity);
-    *( Stack->data + Stack->capacity ) = 0;
+    elem_t temp = *( stack->data + stack->capacity - 1 );
+    --(stack->capacity);
+    *( stack->data + stack->capacity ) = 0;
 
-    StackHash ( Stack );
+    Stack_Hash ( stack );
 
     return temp;
 }
 
-int StackHash ( Stack_Data_t *Stack )
+int Stack_Hash ( Stack_t *stack )
 {
-    long sum  = 0;
-    int stack_size = sizeof ( *Stack );
+    assert ( stack != nullptr );
+    Stack_Verificator ( stack );
 
-    Stack->stack_hash = 0;
+    long sum  = 0;
+    const int stack_size = sizeof ( *stack );
+    stack->stack_hash = 0;
 
     for ( int i = 0; i < stack_size; ++i ) {
-        sum += *( (char *)Stack + i );
+        sum += *( (char *)stack + i );
     }
 
-    Stack->stack_hash = sum;
+    stack->stack_hash = sum;
 
     return sum;
 }
 
-void StackRehash ( Stack_Data_t *Stack )
+void Stack_Rehash ( Stack_t *stack )
 {
-    long long hash_before = Stack->stack_hash;
-    long long hash_after  = StackHash ( Stack );
+    assert ( stack != nullptr );
+
+    const long long hash_before = stack->stack_hash;
+    const long long hash_after  = Stack_Hash ( stack );
 
     if ( hash_before != hash_after ) {
-        Stack->stack_status = Stack->stack_status | ( ( Stack->stack_status | 1 ) << 1 );  // Gde constants???
+        stack->stack_status |=  ( stack->stack_status | 1 ) << STACK_HASH_ERR;
     }
 }
 
-Err_t Verificator ( Stack_Data_t *Stack )
+Stack_Errors_t Stack_Verificator ( Stack_t *stack )
 {
-    if ( Stack->size_stack < 0 || Stack->size_stack < Stack->capacity ) {
-        Stack->stack_status = Stack->stack_status | ( ( Stack->stack_status | 1 ) << 0 );
+    assert ( stack != nullptr );
+
+    if ( stack->size_stack < 0 || stack->size_stack < stack->capacity ) {
+        stack->stack_status |= ( stack->stack_status | 1 ) << STACK_SIZE_ERR;
         printf ( "Size error\n" );
 
-        return SIZE_ERR;
+        return STACK_SIZE_ERR;
     }
-    if ( Stack->stack_status == HASH_ERR ) {                                   // << 1
+    if ( ( stack->stack_status >> STACK_HASH_ERR ) & 1 ) {
         printf ( "Hash error\n" );
 
-        return HASH_ERR;
+        return STACK_HASH_ERR;
     }
-    if ( Stack->data == nullptr ) {
-        Stack->stack_status = Stack->stack_status | ( ( Stack->stack_status | 1 ) << 2 );
+    if ( stack->data == nullptr ) {
+        stack->stack_status |= ( stack->stack_status | 1 ) << STACK_DATA_ERR;
         printf ( "Buffer error\n" );
 
-        return DATA_ERR;
+        return STACK_DATA_ERR;
     }
     #ifdef CANARY_PROTECTION
-    if ( Stack->canary_left != 0xDED || Stack->canary_right != 0xDED ||
-         Stack->data[-sizeof(canary_t) / sizeof(elem_t)] != 0xDED ||
-         Stack->data[Stack->size_stack] != 0xDED ) {
+    if ( stack->canary_left != 0xDED || stack->canary_right != 0xDED ||
+         stack->data[-sizeof ( canary_t ) / sizeof ( elem_t )] != 0xDED ||
+         stack->data[stack->size_stack] != 0xDED ) {
 
-        Stack->stack_status = Stack->stack_status | ( ( Stack->stack_status | 1 ) << 3 );
+        stack->stack_status |= ( stack->stack_status | 1 ) << STACK_CANA_ERR;
         printf ( "Canary error\n" );
 
-        return CANA_ERR;
+        return STACK_CANA_ERR;
     }
     #endif
-    if ( Stack->capacity < 0 ) {
-        Stack->stack_status = Stack->stack_status | ( ( Stack->stack_status | 1 ) << 4 );
+    if ( stack->capacity < 0 ) {
+        stack->stack_status |= ( stack->stack_status | 1 ) << STACK_CAPA_ERR;
         printf ( "Capacity error\n" );
 
-        return CAPA_ERR;
+        return STACK_CAPA_ERR;
     }
 
-    return OK;
+    return STACK_NO_ERR;
 }
 
-void CanaryProtection ( elem_t *canary_begine, Stack_Data_t *Stack )
+void Canary_Protection ( Stack_t *stack, elem_t *canary_begine )
 {
-    #ifdef CANARY_PROTECTION
-    *(canary_t *)canary_begine = Stack->canary_left;
-    *( canary_begine + sizeof( canary_t ) / sizeof ( elem_t ) + Stack->size_stack ) = Stack->canary_right;
-    #endif
+    assert ( canary_begine != nullptr );
+    assert ( stack != nullptr );
+
+    *(canary_t *)canary_begine = stack->canary_left;
+    *( canary_begine + sizeof( canary_t ) / sizeof ( elem_t ) + stack->size_stack ) = stack->canary_right;
 }

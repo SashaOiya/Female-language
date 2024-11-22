@@ -9,7 +9,7 @@ Node_t *Get_General ( struct Language_t *language )
     position.data = language->d_array.data;
     assert ( position.data != nullptr );
     position.index = 0;
-    language->tree.start = Get_Func ( &position );
+    language->tree.start = Get_Func ( &position, language );
 
     return language->tree.start;
 }
@@ -86,6 +86,30 @@ Node_t *Get_Partititon ( struct Position_t *position )
 
         return new_node;
     }
+    else if ( position->data[position->index].type == NODE_TYPE_FUNC ) {   ////// Get_Func
+        new_node = Create_Node ( NODE_TYPE_FUNC, position->data[position->index].cell_code, nullptr, nullptr );
+
+        (position->index)++;
+        assert ( position->data[position->index].cell_code == '(' );  //
+        (position->index)++;
+
+        new_node = Get_Func_Arg ( position, &new_node );
+
+        assert ( position->data[position->index].cell_code == ')' );  //
+        (position->index)++;
+
+        //assert ( position->data[position->index].cell_code == ';' );  //
+        //(position->index)++;
+
+        return new_node;
+    }
+    else if ( position->data[position->index].type == NODE_TYPE_INPUT ||
+              position->data[position->index].type == NODE_TYPE_OUTPUT ) {
+        new_node = Create_Node ( position->data[position->index].type, position->data[position->index].cell_code, nullptr, nullptr );
+        assert ( position->data[position->index+1].cell_code == '(' );
+        assert ( position->data[position->index+2].cell_code == ')' );
+        position->index += 2;
+    }
     else {
         new_node = Create_Node ( position->data[position->index].type,
                                  position->data[position->index].cell_code, nullptr, nullptr );
@@ -146,9 +170,6 @@ Node_t *Get_Statement_List ( struct Position_t *position )  // +
 
     Node_t *state_node = Get_Statement ( position );
     Node_t *else_node = nullptr;
-    /*if ( state_node->type == NODE_TYPE_IF ) {
-        else_node = Get_Else_Node ( positiion );
-    } */
     Node_t *func_node_right = Get_Statement_List ( position );
     new_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, state_node, func_node_right );
 
@@ -164,6 +185,7 @@ Node_t *Get_Statement ( struct Position_t *position )
     if ( position->data[position->index].type == NODE_TYPE_IF ||
          position->data[position->index].type == NODE_TYPE_WHILE ||
          position->data[position->index].type == NODE_TYPE_ELSE ) {   // remove else
+        //
         Node_Type_t prev_type = position->data[position->index].type;
         (position->index)++;
 
@@ -178,6 +200,12 @@ Node_t *Get_Statement ( struct Position_t *position )
         new_node = Create_Node ( prev_type, 0, comp_node_left, new_node );     // 0
 
         assert ( position->data[position->index].cell_code == '}' );   //
+        (position->index)++;
+
+        //Node_t *else_node = Get_Else_Node ( position );
+        //new_node->right = else_node;
+
+        return new_node;
     }
     else if ( position->data[position->index].type == NODE_TYPE_OP &&
               position->data[position->index].cell_code == OP_SEMICLON ) {
@@ -214,8 +242,23 @@ Node_t *Get_Statement ( struct Position_t *position )
         return new_node;
     }
     else if ( position->data[position->index].type == NODE_TYPE_RETURN ) {
-        new_node = Create_Node ( NODE_TYPE_RETURN, position->data[position->index].cell_code, nullptr, nullptr );
+        Node_Type_t prev_type = position->data[position->index].type;
         (position->index)++;
+
+        assert ( position->data[position->index].cell_code == '(' );    //
+
+        Node_t *exp_node_left = nullptr ;
+
+        if ( position->data[position->index+1].cell_code != ')' ) {
+            (position->index)++;
+            assert ( position->data[position->index].type == NODE_TYPE_NUM ||
+                     position->data[position->index].type == NODE_TYPE_VAR );
+            exp_node_left = Create_Node ( position->data[position->index].type,
+                                          position->data[position->index].cell_code, nullptr, nullptr );
+        }
+        (position->index) += 2;
+
+        new_node = Create_Node ( prev_type, position->data[position->index].cell_code, exp_node_left, nullptr );
 
         assert ( position->data[position->index].cell_code == ';' );
     }
@@ -224,7 +267,7 @@ Node_t *Get_Statement ( struct Position_t *position )
     return new_node;
 }
 
-Node_t *Get_Func ( struct Position_t *position )
+Node_t *Get_Func ( struct Position_t *position, struct Language_t *language )
 {
     assert ( position != nullptr );
 
@@ -239,8 +282,8 @@ Node_t *Get_Func ( struct Position_t *position )
     (position->index)++;
 
     assert ( position->data[position->index].cell_code == '(' );   //
-    (position->index)++;
-
+    (position->index)++;                             //////////////////////////////////////////////////
+                                                                           /////
     func_node = Get_Func_Arg ( position, &func_node );
 
     assert ( position->data[position->index].cell_code == ')' );  //
@@ -256,7 +299,7 @@ Node_t *Get_Func ( struct Position_t *position )
 
     func_node->right = state_list_node;
 
-    Node_t *func_node_right = Get_Func ( position );
+    Node_t *func_node_right = Get_Func ( position, language );
 
     func_node = Create_Node ( NODE_TYPE_OP, OP_CONNECT, func_node, func_node_right );
 
@@ -270,8 +313,9 @@ Node_t *Get_Func_Arg ( struct Position_t *position, Node_t **func_node )
 
     Node_t *start_node = *func_node;
                                                  // NODE_TYPE_NUM
-    for ( ; position->data[position->index].type == NODE_TYPE_VAR; ++(position->index) ) {
-            (*func_node)->left = Create_Node ( NODE_TYPE_VAR, position->data[position->index].cell_code, nullptr, nullptr );
+    for ( ; position->data[position->index].type == NODE_TYPE_VAR ||
+            position->data[position->index].type == NODE_TYPE_NUM ; ++(position->index) ) {
+            (*func_node)->left = Create_Node ( position->data[position->index].type, position->data[position->index].cell_code, nullptr, nullptr );
             *func_node = (*func_node)->left;
             if ( position->data[position->index+1].type == NODE_TYPE_OP &&
                  position->data[position->index+1].cell_code == OP_COMMA ) {
@@ -283,4 +327,5 @@ Node_t *Get_Func_Arg ( struct Position_t *position, Node_t **func_node )
 
     return *func_node;
 }
+
 
