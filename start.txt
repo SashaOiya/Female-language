@@ -1,0 +1,13 @@
+castle ( ) {
+	x = give me money();
+	x = lox ();
+	go to the shop(x);
+	
+	leave me alone (x);
+}
+
+lox ()
+{
+	x = x - 1;
+	leave me alone (x);
+}
