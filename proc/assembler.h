@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "comand_code.h"
-#include "stack.h"
+#include "../includes/comand_code.h"
+#include "../includes/stack.h"
 
 const int line_size = 3 * sizeof ( elem_t );
 const int distance_command_const    = 1;

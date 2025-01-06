@@ -6,9 +6,9 @@
 #include <cmath>
 #include <ctype.h>
 
-#include "stack.h"
-#include "comand_code.h"
-#include "my_program.h" //FIXME really bad naming
+#include "../includes/stack.h"
+#include "../includes/comand_code.h"
+#include "../includes/my_program.h" //FIXME really bad naming
 
 enum Arg_Indicator_t {
     ARG_END      = -1,

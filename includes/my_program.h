@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "assembler.h"
+#include "../proc/assembler.h"
 
 int Get_File_Size ( FILE * file );
 Error_t Text_Remove_Comments ( Text_t *text );

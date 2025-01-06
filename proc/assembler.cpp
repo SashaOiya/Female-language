@@ -1,5 +1,5 @@
 #include "assembler.h"
-#include "my_program.h"
+#include "../includes/my_program.h"
 
 //you should do a lot of work to pass this, you just can give up, but i am sure, that's is not your aim
 
@@ -143,9 +143,6 @@ $       if ( strcmp ( line_array->start, command_arr[i].str ) == 0 ) {  // separ
             else {
                 if ( ( line_array->passed_args & ram_passed ) != 0 ) {
                     Push_Arg_Val ( line_array->passed_args, line_array->ram )
-                    //Stack_Push ( &(assembler->stack),( line_array->passed_args << 5 ) | command_arr[i].code );
-                    //Stack_Push ( &(assembler->stack),  line_array->ram );
-                    //++(assembler->text.ip);
                     if ( ( line_array->passed_args & reg_passed ) != 0 ) {
                         Stack_Push ( &(assembler->stack),  line_array->registerr );
                         ++(assembler->text.ip);
@@ -153,19 +150,12 @@ $       if ( strcmp ( line_array->start, command_arr[i].str ) == 0 ) {  // separ
                 }
                 else if ( ( line_array->passed_args & reg_passed ) != 0 ) {
                     Push_Arg_Val ( line_array->passed_args, line_array->registerr )
-                    //Stack_Push ( &(assembler->stack), ( reg_passed << 5 ) | command_arr[i].code ); //
-                    //Stack_Push ( &(assembler->stack),  line_array->registerr );      // element
-                    //++(assembler->text.ip);
                 }
                 else if ( ( line_array->passed_args & const_passed ) != 0 ) {
                     Stack_Push ( &(assembler->stack), ( const_passed << 5 ) | command_arr[i].code );
                     Stack_Push ( &(assembler->stack),  line_array->element );
                     ++(assembler->text.ip);
                 }
-                /*else if ( command_arr[i].code == RETURN ) {
-                    Stack_Push ( &(assembler->stack), command_arr[i].code );
-                    Stack_Push (
-                }   */
                 else {
                     Stack_Push ( &(assembler->stack), command_arr[i].code );
                  }
