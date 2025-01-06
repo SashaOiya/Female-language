@@ -5,18 +5,3 @@ push rbx;
 push 3;
 je 2;
 call 3;
-
-: 2;
-push rbx;
-push 1;
-add;
-pop rbx;
-ret;
-
-: 3;
-jmp 23;
-ret;
-
-push rbx;
-push rbx;
-hlt;

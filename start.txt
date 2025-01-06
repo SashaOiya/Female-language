@@ -1,8 +1,13 @@
-main ( ) {
-	x = 4;
-	while ( x ~ 3 ) {
-		x = x + 1;
-	}
-	return ;
+castle ( ) {
+	x = give me money();
+	x = lox ();
+	go to the shop(x);
+	
+	leave me alone (x);
 }
 
+lox ()
+{
+	x = x - 1;
+	leave me alone (x);
+}
