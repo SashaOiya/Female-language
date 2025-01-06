@@ -10,8 +10,8 @@
 
 ## Как установить 
 ```sh
-git clone git@github.com:KetchuppOfficial/LFU_Cache.git
-cd LFU_Cache
+git clone https://github.com/SashaOiya/Female-language
+cd Female-language
 ```
 ## Грамматика языка
 ```sh
