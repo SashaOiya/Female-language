@@ -14,6 +14,7 @@ git clone git@github.com:KetchuppOfficial/LFU_Cache.git
 cd LFU_Cache
 ```
 ## Грамматика языка
+```sh
 Var_Def := ident '=' Get_Comparison ';'
 Func_Def := [ ident '(' ')' Statement_List ]* 
 Statement_List := '{' [statement]* '}'
@@ -27,6 +28,7 @@ Get_Exp := Get_Term [ [ '*', '/' ] Get_Term*
 Get_Term := Get_Partititon [ [ '+', '-' ] Get_Partition ]*
 Get_Partition := '(' Get_Exp ')' | Get_Neg_Number | ident [ Var,Func '(' ')' ]
 Get_Power := Get_Part ['^' Get_Part]*
+```
 
 ## Синтаксис языка
 
