@@ -1,9 +1,0 @@
-dacha ( ) {
-	x = 5;
-	factorial = 1;
-    	one minute ( x > 0 ) {
-		factorial = factorial * x;
-		x = x - 1;
-	}
-	leave me alone (factorial);
-}
