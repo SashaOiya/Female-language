@@ -1,0 +1,1 @@
+g++ ../includes/log.cpp recurs_des.cpp front.cpp ../includes/dynamic_array.cpp back.cpp midl.cpp

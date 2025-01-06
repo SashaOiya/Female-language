@@ -1,0 +1,20 @@
+
+: 0;	\\castle
+in;
+pop [1];
+call 2;
+pop [1];
+push [1];
+hlt;
+
+: 2;	\\lox
+push 1;
+push [1];
+sub;
+pop [1];
+push [1];
+pop [1];
+push 3;
+jb 3;
+push [1];
+ret;
