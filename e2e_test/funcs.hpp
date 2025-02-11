@@ -6,7 +6,6 @@
 #include <vector>
 #include <cmath>
 #include <gtest/gtest.h>
-#include <benchmark/benchmark.h>
 
 #include "ocl.hpp"
 
