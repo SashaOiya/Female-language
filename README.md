@@ -1,92 +1,45 @@
-# Женский язык
-Этот проект является финальным заданием дополнительно курса Айлаб ( на 1 курсе МФТИ ). 
-## Структура
-Проект состоит из 5 частей : 
-1. fornt-часть, включающая в себя деление на токены, реализацию алгоритма "Рекурсивный спуск", посмотроение бинарного дерева и его графический вывод при помощи Graphviz;
-2. middle-часть, реализующая некоторые оптимизации
-3. back-часть, создающая файл с моими ассемблерными командами.
-4. assembler-часть, которая считывает файл с ассемблерными командами и динамически их кодирует.
-5. processor-часть, обрабатывающая файл с закодированными командами и выполняющая их.
+# Bitonic Sort ( OpenCL )
 
-## Как установить 
+# О проекте
+Результат работы Bitonic Sort на GPU дерева сравнивается в результатом работы std::sort на CPU.
+# Установка
+Склонируйте репозиторий, перейдите в папку с ним.
+Сборка проекта:
 ```sh
-git clone https://github.com/SashaOiya/Female-language
-cd Female-language
+mkdir build
+cd build/
 ```
-## Грамматика языка
+Вы создали папку, в которой будет собираться проект, и перешли в неё
 ```sh
-Var_Def := ident '=' Get_Comparison ';'
-Func_Def := [ ident '(' ')' Statement_List ]* 
-Statement_List := '{' [statement]* '}'
-statement := Var_Def | If | Retutn | While | Else | Get_Func ( ident '(' ')' ';' ) | ';' // comparison
-While := 'while' '(' Get_Comparison ')' Statement_List
-Return := 'return' '(' Get_Exp ')' ';'
-If := 'if' '(' Get_Comparison ')' Statement_List
-Else := 'else' '(' Get_Comparison ')' Statement_List
-Get_Comparison := Get_Exp  [ [ '>', '<', '==' ] Get_exp ]*
-Get_Exp := Get_Term [ [ '*', '/' ] Get_Term*
-Get_Term := Get_Partititon [ [ '+', '-' ] Get_Partition ]*
-Get_Partition := '(' Get_Exp ')' | Get_Neg_Number | ident [ Var,Func '(' ')' ]
-Get_Power := Get_Part ['^' Get_Part]*
+cmake ..
+make
+```
+Чтобы запустить мои unit tests, вам понадобится установить Google Tests.
+Чтобы запустить benchmark, вам понадится установить Google Benchmark.
+
+# Как запустить
+## Тесты :
+Все тесты лежат в папке с репозиторием в папке "tests". 
+Чтобы запустить тесты, в папке build напишите "ctest". Производится сравнение сортировок при помощи моей функции и стандратной std::sort.
+## Свои данные
+Чтобы протестировать свои данные, напишите 
+```sh
+./ocl *
 ```
 
-## Синтаксис языка
-
-У меня С-подобный язык, поэтому синтакические правила остались практически без изменений, кроме :
+## Benchmark :
+ Как уже сказано,вам понадобится установить Google Benchmark (https://github.com/google/benchmark). 
+Бенчмарки можно запустить из корневой папки программы. Запустив их, вы увидите сравнение быстроты работы моей функции и стандартной.
 ```sh
-while -> one minute
-return -> leave me alone
-if -> i take no offence
-else -> i am offended
-main() -> castle()
-input -> give me money
-output -> go to the shop
+cd benchmark/
+ g++ -o bench bench.cpp -std=c++20 -lpthread -LOpenCL -lbenchmark
+./bench
 ```
 
-У меня нет локальных перемнных, поэтому, введя переменную в любом месте кода, она запоминается до конца программы. 
+где вместо * укажите либо "< my_file_name.txt", либо ничего не указывайте и нажмите Enter, после чего вводите свои данные в формате моих тестов.
 
-## Пример программы
+# Результаты сравнения
+Сравненив быстроту выполнения двух алгоритмов, можно сказать, что для массив малых размеров (~ < 512) сортировка на CPU выполняется быстрее, но для массив больших размеров алгоритм на GPU выполняется в несколько раз быстрее. 
 
-```sh
-castle ( ) {
-	x = give me money();
-	x = fairy ();
-	go to the shop(x);
-	
-	leave me alone (x);
-}
-
-fairy ()
-{
-	x = x - 1;
-	leave me alone (x);
-}
-```
-
-Синтаксическое дерево:
-
-![Компьютер](logs/tree0.png)
-
-
-## Ассемблер примера
-
-```sh
-: 0;	\\castle
-in;
-pop [1];
-call 2;
-pop [1];
-push [1];
-hlt;
-
-: 2;	\\fairy
-push 1;
-push [1];
-sub;
-pop [1];
-push [1];
-ret;
-```
-
-## Кодировка
-![Компьютер](encoding.jpg)
+Пример сравнения для массива на 50000 элементов :
+![Компьютер](test3.png)
